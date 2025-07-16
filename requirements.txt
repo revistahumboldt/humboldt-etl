@@ -9,7 +9,7 @@ facebook_business==23.0.0
 frozenlist==1.7.0
 idna==3.10
 multidict==6.6.3
-numpy==2.3.1
+numpy
 pandas==2.3.1
 propcache==0.3.2
 pycountry==24.6.1

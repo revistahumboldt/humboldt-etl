@@ -1,0 +1,5 @@
+# requirements.txt
+# Nenhuma dependência específica é necessária para este "Hello World" básico,
+# mas se você usasse outras bibliotecas (como pandas, facebook-business), elas iriam aqui.
+# Por exemplo:
+# flask # O Flask já é implicitamente parte do ambiente do Cloud Functions.

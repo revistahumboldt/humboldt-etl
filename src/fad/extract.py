@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 from facebook_business.adobjects import adaccount, campaign, adset, ad, adcreative, adsinsights
+from utils.get_bq_last_date import get_bq_last_date
 
-def extract_ad_insights(ad_account_id: str, date_preset: str = 'yesterday') -> list:
+def extract_ad_insights(ad_account_id: str) -> list:
   
     ad_account = adaccount.AdAccount(ad_account_id)
     if not ad_account:
@@ -27,15 +28,15 @@ def extract_ad_insights(ad_account_id: str, date_preset: str = 'yesterday') -> l
     
     # parameter dictionary
     params = {
-        'time_increment': 7, # daily nsights 
-        'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        # 'time_range': {'since': 'YYYY-MM-DD', 'until': 'YYYY-MM-DD'}, # Alternative to date_preset
+        'time_increment': 7, # daily insights 
+        #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
+        'time_range': get_bq_last_date(), # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} for the period {date_preset}...")
+    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date()}...")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries

@@ -2,15 +2,16 @@ from fad.extract import extract_ad_insights
 from fad.transform import transform_insights
 from fad.load import load_data_to_bigquery
 from google.cloud import bigquery # Importar bigquery para usar WriteDisposition
+from utils.get_bq_last_date import get_bq_last_date
 
-def run_etl_pipeline(account_id: str, date_preset: str, 
+def run_etl_pipeline(account_id: str,
                      gcp_project_id: str ,
                      bq_dataset_id: str, bq_table_id: str, bq_service_account_key_path: str):
-    print(f"Starting an ETL pipeline for an account {account_id} for period {date_preset}...")
+    print(f"Starting an ETL pipeline for an account {account_id} for period {get_bq_last_date()}...")
 
     # 1. Extracting
     print("1. Extracting data from Facebook Ads...")
-    raw_insights = extract_ad_insights(account_id, date_preset)
+    raw_insights = extract_ad_insights(account_id)
     print(f"Extracted {len(raw_insights)} items.")
 
     # 2. Transformação
@@ -30,9 +31,8 @@ def run_etl_pipeline(account_id: str, date_preset: str,
             gcp_project_id,
             bq_dataset_id,
             bq_table_id,
-            # Passa o caminho da chave. Será None se não estiver no .env ou ambiente da CF.
-            service_account_key_path=bq_service_account_key_path, 
-            write_disposition=bigquery.WriteDisposition.WRITE_APPEND
+            get_bq_last_date()['since'],
+            bq_service_account_key_path, 
         )
         print("ETL pipeline successfully completed!")
     except Exception as e:

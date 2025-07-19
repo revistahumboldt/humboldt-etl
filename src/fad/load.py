@@ -6,16 +6,17 @@ from .models import AdInsightModel
 from .schema import ad_insights_schema
 from .transform import transform_insights
 from .extract import extract_ad_insights
+from datetime import date 
 
 def load_data_to_bigquery(
     data: List[AdInsightModel],
     project_id: str,
     dataset_id: str, 
     table_id: str,
-    service_account_key_path: Optional[str] = None,
-    write_disposition: str = bigquery.WriteDisposition.WRITE_APPEND
+    target_partition_date: str,
+    service_account_key_path: Optional[str] = None
 ) -> bigquery.job.LoadJob:
-   
+    
     # 1. Authentications
     try:
         credentials = service_account.Credentials.from_service_account_file(service_account_key_path)
@@ -45,7 +46,7 @@ def load_data_to_bigquery(
     table_ref = dataset_ref.table(table_id)
     table = bigquery.Table(table_ref, schema=ad_insights_schema)
     table.time_partitioning = bigquery.TimePartitioning(
-        type_=bigquery.TimePartitioningType.MONTH, 
+        type_=bigquery.TimePartitioningType.DAY, 
         field="date_start", 
         expiration_ms=None 
     )
@@ -74,13 +75,22 @@ def load_data_to_bigquery(
     job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
         schema=ad_insights_schema, 
-        write_disposition=write_disposition,
+        # write_disposition will be set based on the target_partition_date
     )
+
+    # The destination for the load job will be the specific daily partition
+    job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+    # Format the partition suffix as YYYYMMDD for daily partitioning
+    partition_suffix = target_partition_date
+    destination_for_load_job = client.dataset(dataset_id).table(f"{table_id}${partition_suffix}")
+
+    print(f"Loading to specific partition: {destination_for_load_job.path}. Write disposition: {job_config.write_disposition}")
 
     # 6. Starting and Monitoring the Loading Job. CENTRAL FUNCTION
     try:
+        # Use the calculated specific partition as the destination
         load_job = client.load_table_from_json(
-            json_data, table_ref, job_config=job_config 
+            json_data, destination_for_load_job, job_config=job_config 
         )
         print(f"BigQuery loading job started: {load_job.job_id}")
 
@@ -101,4 +111,3 @@ def load_data_to_bigquery(
     except Exception as e:
         print(f"Unexpected error during loading job in BigQuery: {e}")
         raise
-

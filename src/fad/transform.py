@@ -1,57 +1,49 @@
-# src/facebook_etl/transform.py
-import datetime
-# from .models import TransformedAdInsight # Se você tiver modelos para o formato final
+from .models import AdInsightModel, Action 
+from datetime import date, datetime 
 
-def transform_facebook_data(raw_insights: list) -> list:
-    """
-    Transforma os dados brutos de insights de anúncios do Facebook.
-    Args:
-        raw_insights: Uma lista de dicionários contendo os dados brutos extraídos.
-    Returns:
-        Uma lista de dicionários com os dados transformados, prontos para o BigQuery.
-    """
-    transformed_data = []
-    print(f"Iniciando transformação de {len(raw_insights)} registros...")
+def get_action_value(actions_list: list, action_type_name: str, default_value: float = 0.0) -> float:
+    for action in actions_list:
+        if action.get('action_type') == action_type_name:
+            try:
+                return float(action.get('value', default_value))
+            except (ValueError, TypeError): 
+                return default_value
+    return default_value
 
-    for insight in raw_insights:
-        transformed_row = {
-            'ad_account_id': insight.get('account_id'),
-            'campaign_name': insight.get('campaign_name'),
-            'adset_name': insight.get('adset_name'),
-            'ad_name': insight.get('ad_name'),
-            'date': insight.get('date_start'), # BigQuery tipicamente gosta de STRING ou DATE
-            'impressions': int(insight.get('impressions', 0)),
-            'clicks': int(insight.get('clicks', 0)),
-            'spend': float(insight.get('spend', 0.0)),
-            'reach': int(insight.get('reach', 0)),
-            # Adiciona o timestamp de quando o ETL foi executado
-            'etl_load_timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        }
+def transform_insights(raw_insights: list[dict]) -> list[AdInsightModel]:
+    transformed_insights = []
+    for raw_insight in raw_insights:
+            actions_data = raw_insight.get('actions', []) # all the actions in a single dictionary
+       
+        # instance of AdInsightModel
+            transformed_insight = AdInsightModel(
+            id=raw_insight['ad_id'],
+            ad_id=raw_insight['ad_id'],
+            date_start=datetime.strptime(raw_insight['date_start'], '%Y-%m-%d').date(),
+            date_stop=datetime.strptime(raw_insight['date_stop'], '%Y-%m-%d').date(),
+            ad_name=raw_insight['ad_name'],
+            adset_name=raw_insight['adset_name'],
+            campaign_name=raw_insight['campaign_name'],
+            objective=raw_insight.get('objective', 'N/A'), 
+            optimization_goal=raw_insight.get('optimization_goal', 'N/A'),
+            spend=float(raw_insight.get('spend', 0.0)),
+            frequency=float(raw_insight.get('frequency', 0.0)),
+            reach=int(raw_insight.get('reach', 0)),
+            impressions=int(raw_insight.get('impressions', 0)),
+            age=raw_insight.get('age', "N/A"),
+            gender=raw_insight.get('gender', "N/A"),
+            #those attributes are transformed with the function get_action_value
+            link_clicks = int(get_action_value(actions_data, 'link_click')),
+            post_reactions=int(get_action_value(actions_data, 'post_reaction')),
+            pageview_br=int(get_action_value(actions_data, 'offsite_conversion.custom.1352741932244210')),
+            pageview_latam=int(get_action_value(actions_data, 'offsite_conversion.custom.165961032929296')),
+            comments=int(get_action_value(actions_data, 'comment')),
+            post_engagement = int(get_action_value(actions_data, 'post_engagement')),
+            page_engagement=int(get_action_value(actions_data, 'page_engagement')),
+            shares=int(get_action_value(actions_data, 'post')),
+            video_views=int(get_action_value(actions_data, 'video_view')) ,
+        )
+            transformed_insights.append(transformed_insight)
+    return transformed_insights
 
-        # Lidar com o campo 'actions' que é uma lista de dicionários
-        actions = insight.get('actions', [])
-        for action in actions:
-            action_type = action.get('action_type')
-            value = float(action.get('value', 0.0))
-            # Exemplo: mapear tipos de ação para colunas específicas
-            if action_type == 'lead':
-                transformed_row['leads'] = value
-            elif action_type == 'offsite_conversion.fb_pixel_purchase':
-                transformed_row['purchases'] = value
-            # Adicione mais conforme necessário
 
-        # Garantir que colunas não preenchidas existam com valor padrão (ex: 0)
-        transformed_row['leads'] = transformed_row.get('leads', 0)
-        transformed_row['purchases'] = transformed_row.get('purchases', 0)
-
-
-        # Calcular CTR (Click-Through Rate)
-        if transformed_row['impressions'] > 0:
-            transformed_row['ctr'] = (transformed_row['clicks'] / transformed_row['impressions']) * 100
-        else:
-            transformed_row['ctr'] = 0.0
-
-        transformed_data.append(transformed_row)
-
-    print("Transformação concluída.")
-    return transformed_data

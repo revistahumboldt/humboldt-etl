@@ -1,24 +1,31 @@
 # Dockerfile
-# Use uma imagem base oficial do Google Cloud Functions para Python 3.9
+
+# Use uma imagem base oficial do Python 3.11 (slim-buster é bom para tamanho reduzido)
 FROM python:3.11-slim-buster
 
 # Define o diretório de trabalho dentro do contêiner
+# Todos os comandos subsequentes serão executados a partir deste diretório
 WORKDIR /app
 
-# Copia os arquivos de dependências e os instala
+# Copia o arquivo de dependências (requirements.txt) e o instala
+# Fazemos isso primeiro para aproveitar o cache do Docker.
+# Se requirements.txt não mudar, esta camada não será reconstruída.
 COPY requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 
-# Copia o código da sua função
-COPY src/main.py .
+# Copia todo o código da sua aplicação para o diretório de trabalho /app
+# O '.' no final significa "copiar tudo do diretório atual (local) para o WORKDIR (contêiner)"
+# Isso incluirá main.py, src/, utils/, .env (se estiver na raiz local)
+COPY . .
 
-CMD ["python", "main.py"]
+# Define o comando que será executado quando o contêiner iniciar
+# Como main.py está na raiz do seu projeto e você copiou a pasta 'src' para /app,
+# o caminho para o seu script principal dentro do contêiner será /app/src/main.py.
+CMD ["python", "src/main.py"]
 
-
-# Define o ponto de entrada da função
-# Para Cloud Functions, o Google Cloud espera que você defina a função a ser chamada.
-# Isso geralmente é tratado pela gcloud CLI ao implantar, mas em um Dockerfile
-# para um serviço Cloud Run puro, você definiria algo como:
-# CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:hello_http"]
-# No entanto, para Cloud Functions, o Cloud Buildpacks ou a CLI faz a magia por trás.
-# Este Dockerfile é mais para uma "pré-visualização" do ambiente de uma função.y
+# Observações:
+# - Não é necessário configurar portas (como 8080) ou Gunicorn para um Cloud Run Job,
+#   pois ele não serve tráfego HTTP, apenas executa um processo.
+# - Para variáveis de ambiente sensíveis, use o Secret Manager do Google Cloud
+#   em vez de incluí-las diretamente no Dockerfile ou no .env dentro da imagem
+#   (embora para desenvolvimento inicial, o .env possa ser copiado).

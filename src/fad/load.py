@@ -13,17 +13,22 @@ def load_data_to_bigquery(
     project_id: str,
     dataset_id: str, 
     table_id: str,
-    service_account_key_path: Optional[str] = None
+    service_account_key_path: Optional[str]=None
 ) -> Optional[bigquery.LoadJob]:
     
-    # 1. Authentications
+    # 1. Authentication
     try:
-        credentials = service_account.Credentials.from_service_account_file(service_account_key_path)
-        client = bigquery.Client(credentials=credentials, project=project_id)
-        print("Successful authenticated in BQ.")
+        if service_account_key_path and service_account_key_path.strip():
+            credentials = service_account.Credentials.from_service_account_file(service_account_key_path)
+            client = bigquery.Client(credentials=credentials, project=project_id)
+            print("Authenticated with BigQuery using service account key file.")
+        else:
+            client = bigquery.Client(project=project_id)
+            print("Authenticated with BigQuery using default environment credentials.")
     except Exception as e:
         print(f"Bigquery error in authentication step: {e}")
         raise
+   
 
     # 2. Check/verify dataset
     dataset_ref = client.dataset(dataset_id)

@@ -11,12 +11,11 @@ BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")
 BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
-
 def extract_ad_insights(ad_account_id: str) -> list:
-  
+    
+    print(f"DEBUG: ad_account_id received in extract_ad_insights: '{ad_account_id}' (Type: {type(ad_account_id)})")
     ad_account = adaccount.AdAccount(ad_account_id)
-    if not ad_account:
-        raise ValueError(f"Ad account with ID {ad_account_id} not found.")   
+
     insights_data = []
 
     # Defining the fields we want to extract
@@ -40,13 +39,13 @@ def extract_ad_insights(ad_account_id: str) -> list:
     params = {
         'time_increment': 1, # daily insights 
         #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        'time_range': get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH), # Alternative to date_preset
+        'time_range': get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID), # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)}...")
+    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID)}...")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries

@@ -9,14 +9,12 @@ META_AD_ACCOUNT_ID = os.getenv("META_AD_ACCOUNT_ID", "")
 GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
 BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")  
 BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
-GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 META_APP_ID = os.getenv("META_APP_ID","")
 META_APP_SECRET=os.getenv("META_APP_SECRET","")
 META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
 
 if __name__ == '__main__':
-    # print(f"META_AD_AD_ACCOUNT_ID: {META_AD_ACCOUNT_ID}") #
-
+    print(f"META_AD_AD_ACCOUNT_ID: {META_AD_ACCOUNT_ID}") #
     try:
         _initialize_facebook_api(META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN)
     except ValueError as ve:
@@ -28,7 +26,6 @@ if __name__ == '__main__':
             GCP_PROJECT_ID,
             BQ_DATASET_ID,
             BQ_TABLE_ID,
-            GCP_SERVICE_ACCOUNT_KEY_PATH
         )
         print("\nMain script: Pipeline ETL finished.")
     except Exception as e:

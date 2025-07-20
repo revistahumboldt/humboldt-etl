@@ -6,6 +6,7 @@ certifi==2025.7.14
 charset-normalizer==3.4.2
 curlify==3.0.0
 facebook_business==23.0.0
+google-cloud-bigquery
 frozenlist==1.7.0
 idna==3.10
 multidict==6.6.3
@@ -13,6 +14,7 @@ numpy
 pandas==2.3.1
 propcache==0.3.2
 pycountry==24.6.1
+pydantic 
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 pytz==2025.2

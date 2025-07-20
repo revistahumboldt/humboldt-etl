@@ -46,13 +46,13 @@ def get_bq_last_date(
                 
                 # Increment by one day
                 start_day_for_extraction = last_date_from_bq + timedelta(days=1)
-                end_day_for_extraction = last_date_from_bq + timedelta(days=2)
+                end_day_for_extraction = last_date_from_bq + timedelta(days=1)
                 time_range ={'since': start_day_for_extraction.strftime('%Y-%m-%d'),
                              'until': end_day_for_extraction.strftime('%Y-%m-%d')}
 
-                print(f"Last date in BigQuery: {start_day_for_extraction}. Next extraction starts from: {time_range}")
-                return DEFAULT_START_DATE
-                #return time_range
+                print(f"Last date in BigQuery: {last_date_from_bq}. Next extraction starts from: {time_range}")
+                #return DEFAULT_START_DATE
+                return time_range
             else:
                 # Table exists but is empty, or MAX(date_start) returned NULL
                 print(f"Table '{table_id}' is empty or 'date_start' column has no values. Returning default start date.")
@@ -71,6 +71,3 @@ def get_bq_last_date(
         print(f"BigQuery authentication or client creation error: {e}")
         raise # Re-raise authentication errors as they are critical
 
-# Example usage:
-start_date_for_pipeline = get_bq_last_date()
-print(f"Pipeline will start data extraction from: {start_date_for_pipeline}")

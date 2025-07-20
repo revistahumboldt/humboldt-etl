@@ -2,6 +2,14 @@ from dotenv import load_dotenv
 from facebook_business.adobjects import adaccount, campaign, adset, ad, adcreative, adsinsights
 from utils.get_bq_last_date import get_bq_last_date
 from facebook_business.api import FacebookAdsApi, FacebookRequestError, Cursor, FacebookRequest # Importe Cursor e FacebookRequest
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
+BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")  
+BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
+GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
 
 def extract_ad_insights(ad_account_id: str) -> list:
@@ -32,13 +40,13 @@ def extract_ad_insights(ad_account_id: str) -> list:
     params = {
         'time_increment': 1, # daily insights 
         #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        'time_range': get_bq_last_date(), # Alternative to date_preset
+        'time_range': get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH), # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date()}...")
+    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)}...")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries

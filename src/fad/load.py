@@ -13,9 +13,8 @@ def load_data_to_bigquery(
     project_id: str,
     dataset_id: str, 
     table_id: str,
-    target_partition_date: str,
     service_account_key_path: Optional[str] = None
-) -> bigquery.job.LoadJob:
+) -> Optional[bigquery.LoadJob]:
     
     # 1. Authentications
     try:
@@ -52,7 +51,6 @@ def load_data_to_bigquery(
     )
     table.clustering_fields = ["ad_id", "campaign_name"]
 
-
     try:
         client.get_table(table_ref)
         print(f"Table '{table_id}' already exists in dataset '{dataset_id}'.")
@@ -67,21 +65,28 @@ def load_data_to_bigquery(
 
     # 4. Preparing data for loading
     json_data = [item.model_dump(mode='json') for item in data]
+    
     if not json_data:
         print("No data to load. Ending the loading job.")
         return None 
+
+    target_partition_date_obj = data[0].date_start # <-- get the date from the first item in the list
+
+    if not isinstance(target_partition_date_obj, date):
+        raise TypeError("Error: 'target_partition_date_obj' is not a date object.")   
+    
+
+    partition_suffix = target_partition_date_obj.strftime("%Y%m%d") # <-- formated date to YYYYMMDD format
+
 
     # 5. Setting up the Loading Job
     job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
         schema=ad_insights_schema, 
-        # write_disposition will be set based on the target_partition_date
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, # always overwrite the partition
     )
 
-    # The destination for the load job will be the specific daily partition
-    job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
-    # Format the partition suffix as YYYYMMDD for daily partitioning
-    partition_suffix = target_partition_date
+    # Define the destination table with the specific partition suffix
     destination_for_load_job = client.dataset(dataset_id).table(f"{table_id}${partition_suffix}")
 
     print(f"Loading to specific partition: {destination_for_load_job.path}. Write disposition: {job_config.write_disposition}")

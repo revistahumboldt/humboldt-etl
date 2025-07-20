@@ -4,7 +4,7 @@ from google.api_core.exceptions import NotFound
 from datetime import datetime, date, timedelta
 
 # Define the default date as a date object for consistency
-DEFAULT_START_DATE = {'since': '2025-01-01', 'until': '2025-01-02'}  
+DEFAULT_START_DATE = {'since': '2025-01-01', 'until': '2025-01-01'}  
 
 def get_bq_last_date(
     project_id: str = "humboldt-385013",
@@ -51,7 +51,8 @@ def get_bq_last_date(
                              'until': end_day_for_extraction.strftime('%Y-%m-%d')}
 
                 print(f"Last date in BigQuery: {start_day_for_extraction}. Next extraction starts from: {time_range}")
-                return time_range
+                return DEFAULT_START_DATE
+                #return time_range
             else:
                 # Table exists but is empty, or MAX(date_start) returned NULL
                 print(f"Table '{table_id}' is empty or 'date_start' column has no values. Returning default start date.")

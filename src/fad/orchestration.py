@@ -14,6 +14,7 @@ def run_etl_pipeline(account_id: str,
     raw_insights = extract_ad_insights(account_id)
     print(f"Extracted {len(raw_insights)} items.")
 
+    
     # 2. Transformação
     print("2. Data transformation...")
     transformed_insights = transform_insights(raw_insights)
@@ -31,7 +32,6 @@ def run_etl_pipeline(account_id: str,
             gcp_project_id,
             bq_dataset_id,
             bq_table_id,
-            get_bq_last_date()['since'],
             bq_service_account_key_path, 
         )
         print("ETL pipeline successfully completed!")

@@ -41,13 +41,15 @@ def extract_insights(ad_account_id: str, delta_days: int) -> list:
     params = {
         'time_increment': 1, # daily insights , 
         #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        'time_range': DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,1,GCP_SERVICE_ACCOUNT_KEY_PATH), # Alternative to date_preset
+        'time_range': DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,delta_days,GCP_SERVICE_ACCOUNT_KEY_PATH), # Alternative to date_preset
+        #'time_range': {'since':'2025-01-19', 'until':'2025-01-19'}, # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} for the period {DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,delta_days,GCP_SERVICE_ACCOUNT_KEY_PATH)}...")
+    print(f"Extracting insights for the account {ad_account_id} with parameters: {params}")
+    print(f"time_range: {params['time_range']}")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries

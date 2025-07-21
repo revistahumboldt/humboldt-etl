@@ -1,7 +1,11 @@
-# .gitignore
+.venv/
 venv/
-*.pyc
+env/
+
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 .env
-.DS_Store
-.humboldt-gcp.json
+.humboldt-gcp.json  # <-- Adicione esta linha

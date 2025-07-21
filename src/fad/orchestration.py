@@ -1,31 +1,30 @@
-from fad.extract import extract_ad_insights
+from fad.extract import get_raw_ads_data
 from fad.transform import transform_insights
-from fad.load import load_data_to_bigquery
+#from fad.load import load_data_to_bigquery
 from google.cloud import bigquery # Importar bigquery para usar WriteDisposition
-from utils.get_bq_last_date import get_bq_last_date
+from utils.get_date import DateUtils
 from typing import List, Dict, Any, Optional
-
-
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
-BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")  
-BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
 
 def run_etl_pipeline(account_id: str,
                      gcp_project_id: str ,
-                     bq_dataset_id: str, bq_table_id: str,     service_account_key_path: Optional[str]=None
+                     bq_dataset_id: str, 
+                     bq_table_id: str,
+                     delta_days: int = 1,     
+                     service_account_key_path: Optional[str]=None
 ):
-    print(f"Starting an ETL pipeline for an account {account_id} for period {get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID)}...")
+    print(f"Starting an ETL pipeline for an account {account_id} for period {DateUtils.get_time_range(gcp_project_id, bq_dataset_id, bq_table_id, delta_days, service_account_key_path)}...")
 
+   
     # 1. Extracting
     print("1. Extracting data from Facebook Ads...")
-    raw_insights = extract_ad_insights(account_id)
+    raw_insights = get_raw_ads_data(account_id)
     print(f"Extracted {len(raw_insights)} items.")
-
     
+    """"
     # 2. Transformação
     print("2. Data transformation...")
     transformed_insights = transform_insights(raw_insights)
@@ -34,9 +33,10 @@ def run_etl_pipeline(account_id: str,
     if not transformed_insights:
         print("No transformed data to load. Closing the pipeline.")
         return
-
+   
     # 3. Carregamento no BigQuery
     print("3. Loading data into BigQuery...")
+   
     try:
         load_data_to_bigquery(
             transformed_insights,
@@ -45,7 +45,10 @@ def run_etl_pipeline(account_id: str,
             bq_table_id,
         )
         print("ETL pipeline successfully completed!")
+   
+    
+
     except Exception as e:
         print(f"ETL pipeline failed in the loading phase: {e}")
         raise
-
+     """

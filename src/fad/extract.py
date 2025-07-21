@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
 from facebook_business.adobjects import adaccount, campaign, adset, ad, adcreative, adsinsights
-from utils.get_bq_last_date import get_bq_last_date
-from facebook_business.api import FacebookAdsApi, FacebookRequestError, Cursor, FacebookRequest # Importe Cursor e FacebookRequest
+from facebook_business.api import FacebookAdsApi, FacebookRequestError, Cursor, FacebookRequest # Import Cursor e FacebookRequest
+from utils.get_date import DateUtils
+from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
+from fad.init_fb_api import _initialize_facebook_api
 load_dotenv()
 
 GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
@@ -11,7 +13,7 @@ BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")
 BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
-def extract_ad_insights(ad_account_id: str) -> list:
+def extract_insights(ad_account_id: str, delta_days: int) -> list:
     
     print(f"DEBUG: ad_account_id received in extract_ad_insights: '{ad_account_id}' (Type: {type(ad_account_id)})")
     ad_account = adaccount.AdAccount(ad_account_id)
@@ -37,15 +39,15 @@ def extract_ad_insights(ad_account_id: str) -> list:
     
     # parameter dictionary
     params = {
-        'time_increment': 1, # daily insights 
+        'time_increment': 1, # daily insights , 
         #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        'time_range': get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID), # Alternative to date_preset
+        'time_range': DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,1,GCP_SERVICE_ACCOUNT_KEY_PATH), # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} for the period {get_bq_last_date(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID)}...")
+    print(f"Extracting insights for the account {ad_account_id} for the period {DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,delta_days,GCP_SERVICE_ACCOUNT_KEY_PATH)}...")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries
@@ -78,8 +80,8 @@ def extract_ad_insights(ad_account_id: str) -> list:
                     # If response is not iterable, we assume it's a single object
                     insights_list.append(response)
             
-            
         insights_data = insights_list
+        print(f"Insights extracted successfully: {len(insights_data)} records found.")
     
     except FacebookRequestError as e:
         print(f"Facebook API Error while extracting insights: {e.api_error_code} - {e.api_error_message}")
@@ -92,3 +94,24 @@ def extract_ad_insights(ad_account_id: str) -> list:
 
     return insights_data
 
+def get_raw_ads_data(ad_account_id: str) -> list:
+    extract_has_data = False
+    increment = 1
+    while not extract_has_data:
+        raw_data = extract_insights(ad_account_id, increment)
+        if len(raw_data) == 0:
+            increment += 1
+            print(len(raw_data))
+            print(f"No data found for increment {increment}. Trying next increment...")
+        if len(raw_data) > 0:
+            extract_has_data = True
+            print(f"Data found for increment {increment}. Extracted {len(raw_data)} records.")
+            increment = 1  # Reset increment for next extraction
+            return list(raw_data)
+        if increment == 50:
+            print("No data found multiple tries. Exiting extraction.")
+            return []
+    # Ensure a list is always returned, even if the loop does not execute
+    return []
+        
+    

@@ -5,7 +5,6 @@ from typing import List, Dict, Any, Optional
 from .models import AdInsightModel
 from .schema import ad_insights_schema
 from .transform import transform_insights
-from .extract import extract_ad_insights
 from datetime import date 
 
 def load_data_to_bigquery(
@@ -28,7 +27,6 @@ def load_data_to_bigquery(
     except Exception as e:
         print(f"Bigquery error in authentication step: {e}")
         raise
-   
 
     # 2. Check/verify dataset
     dataset_ref = client.dataset(dataset_id)

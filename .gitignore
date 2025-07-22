@@ -8,4 +8,4 @@ __pycache__/
 *.pyd
 
 .env
-humboldt-gcp-credentials
+humboldt-gcp-credentials.json

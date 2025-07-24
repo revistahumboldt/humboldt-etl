@@ -35,4 +35,4 @@ class AdInsightModel(BaseModel):
     page_engagement: int
     post_engagement: int
     shares: int
-    video_views: int 
+    video_views: int

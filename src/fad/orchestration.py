@@ -1,4 +1,4 @@
-from fad.extract import get_raw_ads_data
+from fad.extract import extract_raw_data
 from fad.load import load_data_to_bigquery
 from fad.transform import transform_insights
 #from fad.load import load_data_to_bigquery
@@ -14,19 +14,17 @@ def run_etl_pipeline(account_id: str,
                      gcp_project_id: str ,
                      bq_dataset_id: str, 
                      bq_table_id: str,
-                     delta_days: int = 1,     
+                     time_range: dict,     
                      service_account_key_path: Optional[str]=None
 ):
-    print(f"Starting an ETL pipeline for an account {account_id} for period {DateUtils.get_time_range(gcp_project_id, bq_dataset_id, bq_table_id, delta_days, service_account_key_path)}...")
-
+    print(f"Starting an ETL pipeline for an account {account_id} for period {time_range}...")
    
     # 1. Extracting
     print("1. Extracting data from Facebook Ads...")
-    raw_insights = get_raw_ads_data(account_id, gcp_project_id, bq_dataset_id, bq_table_id, delta_days, service_account_key_path)
+    raw_insights = extract_raw_data(account_id, time_range, service_account_key_path)
     print(f"Extracted {len(raw_insights)} items.")
     
-    
-    # 2. Transformação
+    # 2. Transforming
     print("2. Data transformation...")
     transformed_insights = transform_insights(raw_insights)
     print(f"Transformation applied on {len(transformed_insights)} items.")
@@ -34,9 +32,8 @@ def run_etl_pipeline(account_id: str,
     if not transformed_insights:
         print("No transformed data to load. Closing the pipeline.")
         return
-   
     
-    # 3. Carregamento no BigQuery
+    # 3. Loading in BigQuery
     print("3. Loading data into BigQuery...")
    
     if service_account_key_path != None and service_account_key_path.strip():

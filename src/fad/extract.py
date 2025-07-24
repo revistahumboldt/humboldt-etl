@@ -8,12 +8,9 @@ from dotenv import load_dotenv
 from fad.init_fb_api import _initialize_facebook_api
 load_dotenv()
 
-
-def extract_insights(ad_account_id: str, 
-                    gcp_project_id: str, 
-                    bq_dataset_id: str,
-                    bq_table_id: str,
-                    delta_days: int = 1,
+#extracts insigts for a given time range and ad account
+def extract_raw_data(ad_account_id: str, 
+                    time_range: dict,
                      service_account_key_path: Optional[str]=None) -> list:
     
     print(f"DEBUG: ad_account_id received in extract_ad_insights: '{ad_account_id}' (Type: {type(ad_account_id)})")
@@ -42,8 +39,7 @@ def extract_insights(ad_account_id: str,
     params = {
         'time_increment': 1, # daily insights , 
         #'date_preset': date_preset, # 'yesterday', 'last_7_days', etc.
-        'time_range': DateUtils.get_time_range(gcp_project_id, bq_dataset_id, bq_table_id,delta_days,service_account_key_path), # Alternative to date_preset
-        #'time_range': {'since':'2025-01-19', 'until':'2025-01-19'}, # Alternative to date_preset
+        'time_range': time_range, # Alternative to date_preset
         'level': 'ad', # level (account, campaign, adset, ad)
         'breakdowns': ['age', 'gender'],       
         'action_breakdowns': ['action_type']  
@@ -97,18 +93,19 @@ def extract_insights(ad_account_id: str,
 
     return insights_data
 
-def get_raw_ads_data(ad_account_id: str, 
-                    gcp_project_id: str, 
-                    bq_dataset_id: str,
-                    bq_table_id: str,
-                    delta_days: int = 1,
-                    service_account_key_path: Optional[str]=None
 
+
+
+
+
+def get_raw_ads_data(ad_account_id: str, 
+                    time_range: dict,
+                    service_account_key_path: Optional[str]=None
                      ) -> list:
     extract_has_data = False
-    increment = delta_days
+    increment = 1
     while not extract_has_data:
-        raw_data = extract_insights(ad_account_id,gcp_project_id, bq_dataset_id, bq_table_id, delta_days, service_account_key_path)
+        raw_data = extract_raw_data(ad_account_id, time_range, service_account_key_path)
         if len(raw_data) == 0:
             delta_days += 1
             print(len(raw_data))

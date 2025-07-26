@@ -22,6 +22,7 @@ except ValueError as ve:
     print(f"\nMain script: A fatal error occurred during Facebook API initialization: {ve}")
     exit(1) 
 
+""""
 try:
     print(f"\nRunning ETL pipeline for window: {WINDOW}")
     # If it is an empty string (""), Python will treat it as "False" in a boolean context
@@ -41,3 +42,43 @@ try:
 except Exception as e:
     print(f"\nMain script: A fatal error occurred in the ETL pipeline: {e}")
     exit(1) 
+
+"""
+
+if GCP_SERVICE_ACCOUNT_KEY_PATH == None or GCP_SERVICE_ACCOUNT_KEY_PATH == "":
+    try:
+        _initialize_facebook_api(META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN)
+    except ValueError as ve:
+        print(f"\nMain script: A fatal error occurred in the ETL pipeline: {ve}")
+    try:
+        orquerstrate_etl(
+        META_AD_ACCOUNT_ID,
+        GCP_PROJECT_ID,
+        BQ_DATASET_ID,
+        BQ_TABLE_ID,
+        WINDOW
+        )
+        print("\nMain script: Pipeline ETL finished.")
+    except Exception as e:
+        print(f"\nMain script: A fatal error occurred in the ETL pipeline: {e}")
+    
+
+if GCP_SERVICE_ACCOUNT_KEY_PATH != None or GCP_SERVICE_ACCOUNT_KEY_PATH != "":
+    try:
+        _initialize_facebook_api(META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN)
+    except ValueError as ve:
+        print(f"\nMain script: A fatal error occurred in the ETL pipeline: {ve}")
+    try:
+        print("Running ETL pipeline with service account key path:")
+        print(GCP_SERVICE_ACCOUNT_KEY_PATH)
+        orquerstrate_etl(
+        META_AD_ACCOUNT_ID,
+        GCP_PROJECT_ID,
+        BQ_DATASET_ID,
+        BQ_TABLE_ID,
+        WINDOW,
+        GCP_SERVICE_ACCOUNT_KEY_PATH 
+        )
+        print("\nMain script: Pipeline ETL finished.")
+    except Exception as e:
+        print(f"\nMain script: A fatal error occurred in the ETL pipeline: {e}")

@@ -24,16 +24,16 @@ def orquerstrate_etl(account_id: str,
 
     if window == "daily":
         try:
-            print("Executing dalily etl")
-            daily_time_range = DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID)
-            run_etl(account_id,gcp_project_id, bq_dataset_id, bq_table_id, daily_time_range, window)
+            print("Executing daily ETL")
+            daily_time_range = DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, 1,GCP_SERVICE_ACCOUNT_KEY_PATH)
+            run_etl(account_id,gcp_project_id, bq_dataset_id, bq_table_id, daily_time_range, window, service_account_key_path)
         except Exception as e:
-            print("\nError executing dalily etl", e)
+            print("\nError executing daily ETL", e)
             sys.exit(1)
 
     if window == "last_28_days":
         try:
-            last_bq_date = DateUtils.get_bq_last_day(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID)
+            last_bq_date = DateUtils.get_bq_last_day(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)
             last_28_days = DateUtils.get_last_28_days()
             if last_bq_date is not None:
                 delta = DateUtils.get_delta_days(last_bq_date)

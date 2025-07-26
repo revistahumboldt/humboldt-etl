@@ -9,7 +9,13 @@ from datetime import datetime
 
 class DateUtils:
 
-    default_start_date: Dict[str, str] = {'since': '2025-01-01', 'until': '2025-01-01'}
+    @staticmethod
+    def default_time_range(delta: int = 0):
+        since = date(2023,2,15) + timedelta(delta)
+        until = date(2023,2,15) + timedelta(delta)
+        return {'since':since.strftime('%Y-%m-%d'),'until': until.strftime('%Y-%m-%d')
+        }
+
 
     @staticmethod
     def get_current_date() -> dict:
@@ -54,10 +60,10 @@ class DateUtils:
                 }
             else:
                 print(f"Table '{table_id}' is empty or 'date_start' has no values. Returning default date.")
-            return DateUtils.default_start_date
+            return DateUtils.default_time_range(delta_days)
         except NotFound as e:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
-            return DateUtils.default_start_date
+            return DateUtils.default_time_range(delta_days)
 
     @staticmethod
     def get_time_range(
@@ -90,10 +96,10 @@ class DateUtils:
                 return time_range
             else:
                 print(f"Table '{table_id}' is empty or 'date_start' has no values. Returning default date.")
-            return DateUtils.default_start_date
+            return DateUtils.default_time_range(delta_days)
         except NotFound as e:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
-            return DateUtils.default_start_date     
+            return DateUtils.default_time_range(delta_days)    
 
     @staticmethod
     def get_bq_last_day(
@@ -104,6 +110,7 @@ class DateUtils:
     ) -> Optional[date]:
         """Fetches the last date from BigQuery."""
         client = AuthUtils.bq_authenticate(project_id, service_account_key_path)
+
         try:
             query_string = f"""
             SELECT MAX(date_start) as last_date

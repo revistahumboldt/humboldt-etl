@@ -24,7 +24,7 @@ def run_etl(ad_account_id: str,
         try:
             print(f"Starting an ETL pipeline for an account {ad_account_id} for period {time_range}...")
             print("\n1. Extracting data from Facebook Ads...")
-            raw_insights = get_next_day_data(ad_account_id, gcp_project_id, bq_dataset_id,bq_table_id)
+            raw_insights = get_next_day_data(ad_account_id, gcp_project_id, bq_dataset_id,bq_table_id, service_account_key_path)
             print(f"Extracted {len(raw_insights)} items.")
         except Exception as e:
              print("Error by colleting raw daily data", e)
@@ -32,7 +32,7 @@ def run_etl(ad_account_id: str,
     if window == "last_28_days":
         try:
             print("1. Extracting data from Facebook Ads...")
-            raw_insights = get_fb_raw_data(ad_account_id, time_range, service_account_key_path)
+            raw_insights = get_fb_raw_data(ad_account_id, time_range)
             print(f"Extracted {len(raw_insights)} items.")
         except Exception as e:
             print("Error by colleting raw last_28_days data", e)
@@ -70,7 +70,7 @@ def run_etl(ad_account_id: str,
                     transformed_insights,
                     gcp_project_id,
                     bq_dataset_id,
-                    bq_table_id,
+                    bq_table_id
                 )
                 print("\nETL pipeline successfully completed on the cloud!")
         except Exception as e:

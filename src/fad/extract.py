@@ -9,10 +9,10 @@ load_dotenv()
 
 #extracts insigts for a given time range and ad account
 def get_fb_raw_data(ad_account_id: str, 
-                    time_range: dict,
-                     service_account_key_path: Optional[str]=None) -> list:
+                    time_range: dict
+                    ) -> list:
     
-    print(f"DEBUG: ad_account_id received in extract_ad_insights: '{ad_account_id}' (Type: {type(ad_account_id)})")
+    #print(f"DEBUG: ad_account_id received in extract_ad_insights: '{ad_account_id}' (Type: {type(ad_account_id)})")
     ad_account = adaccount.AdAccount(ad_account_id)
 
     insights_data = []
@@ -44,8 +44,8 @@ def get_fb_raw_data(ad_account_id: str,
         'action_breakdowns': ['action_type']  
     }
 
-    print(f"Extracting insights for the account {ad_account_id} with parameters: {params}")
-    print(f"time_range: {params['time_range']}")
+    #print(f"Extracting insights for the account {ad_account_id} with parameters: {params}")
+    #print(f"time_range: {params['time_range']}")
     try:
         # get_insights() returns an iterator, which handles pagination automatically
         # insights is a list of dictionaries
@@ -100,13 +100,17 @@ def get_next_day_data(ad_account_id: str,
                      ) -> list:
     extract_has_data = False
     increment = 1
+    
     while not extract_has_data:
         time_range = DateUtils.get_time_range(gcp_project_id, gcp_dataset_id, gcp_table_id, increment, service_account_key_path)
-        print(f"Trying to get data for time_range: {time_range}") 
+        #print(f"Trying to get data for time_range: {time_range}") 
+        print("\n", increment)
+        print("\n", time_range)
 
-        raw_data = get_fb_raw_data(ad_account_id, time_range, service_account_key_path)
+        raw_data = get_fb_raw_data(ad_account_id, time_range)
+        
         if len(raw_data) == 0:
-            increment += 1
+            increment = increment + 1
             print(len(raw_data))
             print(f"No data found for increment {increment}. Trying next increment.")
         if len(raw_data) > 0:

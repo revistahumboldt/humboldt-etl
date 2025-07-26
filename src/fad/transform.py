@@ -42,6 +42,7 @@ def transform_insights(raw_insights: list[dict]) -> list[AdInsightModel]:
             page_engagement=int(get_action_value(actions_data, 'page_engagement')),
             shares=int(get_action_value(actions_data, 'post')),
             video_views=int(get_action_value(actions_data, 'video_view')),
+            last_updated_timestamp=datetime.now()
         )
             transformed_insights.append(transformed_insight)
     return transformed_insights

@@ -19,13 +19,6 @@ META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
 
-try:
-    _initialize_facebook_api(META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN)
-    raw_data = get_next_day_data(META_AD_ACCOUNT_ID, GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)
-except ValueError as ve:
-    print(f"\nMain script: A fatal error occurred: {ve}")
-    exit(1) 
-
 
 
 

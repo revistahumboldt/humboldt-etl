@@ -1,4 +1,4 @@
-from google.cloud import bigquery 
+from google.cloud import bigquery
 from utils.bq_auth import AuthUtils
 from google.oauth2 import service_account
 from google.api_core.exceptions import NotFound
@@ -6,17 +6,17 @@ from typing import List, Dict, Any, Optional
 from .models import AdInsightModel
 from .schema import ad_insights_schema
 from datetime import date, datetime
-import json 
+import json
 
 def load_data_to_bigquery(
     data: List[AdInsightModel],
     project_id: str,
     dataset_id: str,
     table_id: str,
-    window_type: str, 
     service_account_key_path: Optional[str]=None
 ) -> Optional[bigquery.LoadJob]:
 
+    # ... (código de autenticação, criação de dataset e tabela permanece o mesmo) ...
     # 1. Authentication
     client = AuthUtils.bq_authenticate(project_id, service_account_key_path)
 
@@ -41,10 +41,10 @@ def load_data_to_bigquery(
     table = bigquery.Table(table_ref, schema=ad_insights_schema)
     table.time_partitioning = bigquery.TimePartitioning(
         type_=bigquery.TimePartitioningType.DAY,
-        field="date_start", 
+        field="date_start",
         expiration_ms=None
     )
-    table.clustering_fields = ["ad_id", "campaign_name"] 
+    table.clustering_fields = ["ad_id", "campaign_name"]
 
     try:
         client.get_table(table_ref)
@@ -66,16 +66,13 @@ def load_data_to_bigquery(
         return None
 
     # --- MERGE ---
-    # For MERGE, we load all the data into a temporary table.
-    # The name of the temporary table must be unique per run.
     temp_table_id = f"{table_id}_temp_{client.project}_{dataset_id}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
     temp_table_ref = client.dataset(dataset_id).table(temp_table_id)
 
-    # Configuration for loading into the temporary table
     temp_load_job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-        schema=ad_insights_schema, 
-        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE, # Always truncate the temp table before loading.
+        schema=ad_insights_schema,
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
     )
 
     try:
@@ -83,40 +80,42 @@ def load_data_to_bigquery(
         load_temp_job = client.load_table_from_json(
             json_data, temp_table_ref, job_config=temp_load_job_config
         )
-        load_temp_job.result() # Wait for the temp table to load
+        load_temp_job.result()
         print(f"Data loaded to temporary table {temp_table_id}. Total rows: {load_temp_job.output_rows}")
 
-        # Defining the columns to be updated/inserted.
-        # These are the columns that may change over time or that you always want to be the most recent.
-        # We exclude primary keys or columns that should not be updated.
-        update_cols = [
-             # Metrics
-            "spend",
-            "frequency",
-            "reach",
-            "impressions",
-            "link_clicks",
-            "post_reactions",
-            "pageview_br",
-            "pageview_latam",
-            "comments",
-            "page_engagement",
-            "post_engagement",
-            "shares",
-            "video_views",
-        ]
-        update_statements = ", ".join([f"T.{col} = S.{col}" for col in update_cols])
-        insert_cols = ", ".join([f"T.{field.name}" for field in ad_insights_schema])
-        insert_values = ", ".join([f"S.{field.name}" for field in ad_insights_schema])
+        # --- CORREÇÃO APLICADA AQUI ---
 
-        # 5. Perform the MERGE (UPSERT) operation
-        # Important: The ON clause must identify a row ONLY.
-        # It is usually made up of the ID (ad_id) and the date (date_start).
+        # 1. Defina as colunas que vêm da tabela de origem (S)
+        update_cols_from_source = [
+            "spend", "frequency", "reach", "impressions", "link_clicks",
+            "post_reactions", "pageview_br", "pageview_latam", "comments",
+            "page_engagement", "post_engagement", "shares", "video_views",
+        ]
+        
+        # 2. Crie a lista de instruções de UPDATE a partir dessas colunas
+        update_statements_list = [f"T.{col} = S.{col}" for col in update_cols_from_source]
+        
+        # 3. Adicione a instrução de UPDATE para o timestamp
+        update_statements_list.append("T.last_updated_timestamp = CURRENT_TIMESTAMP()")
+        
+        # 4. Junte todas as instruções com vírgula
+        update_statements = ", ".join(update_statements_list)
+
+        # O restante do código para INSERT permanece o mesmo da correção anterior
+        insertable_fields = [field for field in ad_insights_schema if field.name != 'last_updated_timestamp']
+        insert_cols = ", ".join([f"{field.name}" for field in insertable_fields])
+        insert_values = ", ".join([f"S.{field.name}" for field in insertable_fields])
+
+        #print(f"Update statements: {update_statements}")
+        #print(f"Generated insert_cols: '{insert_cols}'")
+        #print(f"Generated insert_values: '{insert_values}'")
+
+        # 5. Simplifique a query MERGE para usar a string gerada
         merge_query = f"""
         MERGE INTO `{project_id}.{dataset_id}.{table_id}` T
         USING `{project_id}.{dataset_id}.{temp_table_id}` S
-        ON 
-        T.ad_id = S.ad_id AND 
+        ON
+        T.ad_id = S.ad_id AND
         T.date_start = S.date_start AND
         T.ad_name = S.ad_name AND
         T.adset_name = S.adset_name AND
@@ -125,32 +124,31 @@ def load_data_to_bigquery(
         T.age = S.age AND
         T.gender = S.gender
         WHEN MATCHED THEN
-            UPDATE SET
-                {update_statements},
-                T.last_updated_timestamp = CURRENT_TIMESTAMP() -- Adicione um campo para rastrear a última atualização
+            UPDATE SET {update_statements}
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT ({insert_cols}, last_updated_timestamp) -- Inclua last_updated_timestamp aqui também
+            INSERT ({insert_cols}, last_updated_timestamp)
             VALUES ({insert_values}, CURRENT_TIMESTAMP());
         """
 
+        print("--- Generated MERGE Query ---")
+        print(merge_query)
+        print("-----------------------------")
 
         print(f"Executing MERGE query from {temp_table_id} to {table_id}...")
         query_job = client.query(merge_query)
-        query_job.result() # Awaiting completion of MERGE query
+        query_job.result()
         print("MERGE operation completed successfully.")
 
-        # 6. Delete the temporary table
         client.delete_table(temp_table_ref)
         print(f"Temporary table {temp_table_id} deleted.")
 
-        return load_temp_job # Returns the temporary loading job or a success status
+        return load_temp_job
 
     except Exception as e:
         print(f"Error during BigQuery MERGE operation: {e}")
-        # Ensure that the temporary table is deleted even in the event of an error
         try:
             client.delete_table(temp_table_ref)
             print(f"Temporary table {temp_table_id} deleted after error.")
         except Exception as cleanup_e:
             print(f"Error cleaning up temporary table: {cleanup_e}")
-        raise # Re-raise original erro 
+        raise

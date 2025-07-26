@@ -7,14 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 from typing import List, Dict, Any, Optional
 
-GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
-BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")  
-BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
-GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
-BQ_DATASET_ID=os.getenv("BQ_DATASET_ID", "")  
-BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
-GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
-
 def orquerstrate_etl(account_id: str,
                      gcp_project_id: str,
                      bq_dataset_id: str, 
@@ -25,7 +17,7 @@ def orquerstrate_etl(account_id: str,
     if window == "daily":
         try:
             print("Executing daily ETL")
-            daily_time_range = DateUtils.get_time_range(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, 1,GCP_SERVICE_ACCOUNT_KEY_PATH)
+            daily_time_range = DateUtils.get_time_range(gcp_project_id, bq_dataset_id, bq_table_id, 1,service_account_key_path)
             run_etl(account_id,gcp_project_id, bq_dataset_id, bq_table_id, daily_time_range, window, service_account_key_path)
         except Exception as e:
             print("\nError executing daily ETL", e)
@@ -33,7 +25,7 @@ def orquerstrate_etl(account_id: str,
 
     if window == "last_28_days":
         try:
-            last_bq_date = DateUtils.get_bq_last_day(GCP_PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)
+            last_bq_date = DateUtils.get_bq_last_day(gcp_project_id, bq_dataset_id, bq_table_id, service_account_key_path)
             last_28_days = DateUtils.get_last_28_days()
             if last_bq_date is not None:
                 delta = DateUtils.get_delta_days(last_bq_date)

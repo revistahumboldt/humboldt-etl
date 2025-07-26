@@ -36,3 +36,4 @@ class AdInsightModel(BaseModel):
     post_engagement: int
     shares: int
     video_views: int
+    last_updated_timestamp: datetime 

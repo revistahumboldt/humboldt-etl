@@ -59,7 +59,6 @@ class DateUtils:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
             return DateUtils.default_start_date
 
-
     @staticmethod
     def get_time_range(
         project_id: str,
@@ -97,7 +96,7 @@ class DateUtils:
             return DateUtils.default_start_date     
 
     @staticmethod
-    def get_bq_last_date(
+    def get_bq_last_day(
         project_id: str,
         dataset_id: str,
         table_id: str,
@@ -120,3 +119,13 @@ class DateUtils:
         except NotFound as e:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
             return None
+        
+    
+    
+    @staticmethod
+    def get_delta_days(bq_last_date:date):
+        current_date = datetime.now()
+        if bq_last_date is not None:
+            bq_last_date_dt = datetime.combine(bq_last_date, datetime.min.time())
+            return (current_date-bq_last_date_dt).days 
+        

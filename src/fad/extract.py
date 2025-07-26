@@ -1,15 +1,14 @@
 from dotenv import load_dotenv
-from facebook_business.adobjects import adaccount, campaign, adset, ad, adcreative, adsinsights
-from facebook_business.api import FacebookAdsApi, FacebookRequestError, Cursor, FacebookRequest # Import Cursor e FacebookRequest
+from facebook_business.adobjects import adaccount
+from facebook_business.api import FacebookRequestError, Cursor, FacebookRequest # Import Cursor e FacebookRequest
 from utils.get_date import DateUtils
 from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
-from fad.init_fb_api import _initialize_facebook_api
 load_dotenv()
 
 #extracts insigts for a given time range and ad account
-def extract_raw_data(ad_account_id: str, 
+def get_fb_raw_data(ad_account_id: str, 
                     time_range: dict,
                      service_account_key_path: Optional[str]=None) -> list:
     
@@ -61,7 +60,6 @@ def extract_raw_data(ad_account_id: str,
                 insights_list.append(insight)
 
         if isinstance(insights_raw_response, FacebookRequest):
-            # Se é um FacebookRequest, iteramos diretamente
             # If FacebookRequest, we need to execute it
             # and then iterate over the result. This is less common for get_insights.
             # However, FacebookRequest.execute() returns a FacebookResponse,
@@ -94,29 +92,30 @@ def extract_raw_data(ad_account_id: str,
     return insights_data
 
 
-
-
-
-
-def get_raw_ads_data(ad_account_id: str, 
-                    time_range: dict,
-                    service_account_key_path: Optional[str]=None
+def get_next_day_data(ad_account_id: str, 
+                        gcp_project_id:str, 
+                        gcp_dataset_id:str, 
+                        gcp_table_id:str,
+                        service_account_key_path: Optional[str]=None
                      ) -> list:
     extract_has_data = False
     increment = 1
     while not extract_has_data:
-        raw_data = extract_raw_data(ad_account_id, time_range, service_account_key_path)
+        time_range = DateUtils.get_time_range(gcp_project_id, gcp_dataset_id, gcp_table_id, increment, service_account_key_path)
+        print(f"Trying to get data for time_range: {time_range}") 
+
+        raw_data = get_fb_raw_data(ad_account_id, time_range, service_account_key_path)
         if len(raw_data) == 0:
-            delta_days += 1
+            increment += 1
             print(len(raw_data))
-            print(f"No data found for increment {delta_days}. Trying next increment...")
+            print(f"No data found for increment {increment}. Trying next increment.")
         if len(raw_data) > 0:
             extract_has_data = True
-            print(f"Data found for increment {delta_days}. Extracted {len(raw_data)} records.")
+            print(f"Data found for increment {increment}. Extracted {len(raw_data)} records.")
             increment = 1  # Reset increment for next extraction
             return list(raw_data)
-        if increment == 50:
-            print("No data found multiple tries. Exiting extraction.")
+        if increment > 50:
+            print("\nNo data found multiple tries. Exiting extraction.")
             return []
     # Ensure a list is always returned, even if the loop does not execute
     return []

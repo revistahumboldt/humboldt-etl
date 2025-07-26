@@ -31,4 +31,6 @@ ad_insights_schema = [
     SchemaField("post_engagement", "INTEGER", mode="REQUIRED", description="Engajamento com a publicação"),
     SchemaField("shares", "INTEGER", mode="REQUIRED", description="Número de compartilhamentos"),
     SchemaField("video_views", "INTEGER", mode="REQUIRED", description="Número de visualizações de vídeo"),
+    SchemaField("last_updated_timestamp", "TIMESTAMP", mode="REQUIRED", description="Last update time"),
+
 ]

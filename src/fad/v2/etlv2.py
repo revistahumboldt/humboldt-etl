@@ -1,6 +1,6 @@
-from fad.extract import get_fb_raw_data, get_next_day_data
-from fad.load import load_data_to_bigquery
-from fad.transform import transform_insights
+from fad.v2.extractv2 import get_fb_raw_data, get_next_day_data
+from fad.v2.loadv2 import load_data_to_bigquery
+from fad.v2.transformv2 import transform_insights
 #from fad.load import load_data_to_bigquery
 from google.cloud import bigquery 
 from typing import List, Dict, Any, Optional

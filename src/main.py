@@ -14,6 +14,7 @@ META_APP_SECRET=os.getenv("META_APP_SECRET","")
 META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 WINDOW = os.getenv("WINDOW","")
+BREAKDOWN=os.getenv("BREAKDOWN","")
 
 # ---  PRINTS DEBUG ---
 #print(f"DEBUG: Verificando variáveis de entrada para orchestrate_etl...")
@@ -61,7 +62,11 @@ try:
         GCP_PROJECT_ID,
         BQ_DATASET_ID,
         BQ_TABLE_ID,
-        WINDOW)
+        WINDOW,
+        BREAKDOWN,
+        META_APP_SECRET,
+        META_ACCESS_TOKEN
+        )
 
 except Exception as e:
     print(f"\nMain script: A fatal error occurred in the ETL pipeline: {e}")

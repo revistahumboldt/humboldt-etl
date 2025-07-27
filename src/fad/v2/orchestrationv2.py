@@ -1,4 +1,4 @@
-from fad.etl import run_etl
+from fad.v2.etlv2 import run_etl
 from utils.get_date import DateUtils
 import sys
 from dotenv import load_dotenv

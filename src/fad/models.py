@@ -37,3 +37,32 @@ class AdInsightModel(BaseModel):
     shares: int
     video_views: int
     last_updated_timestamp: datetime 
+
+
+    
+class PlatformAdInsightModel(BaseModel):
+    id: str
+    ad_id: str
+    date_start: date
+    date_stop: date
+    ad_name: str
+    adset_name: str
+    campaign_name: str
+    objective: str
+    optimization_goal: str
+    spend: float
+    frequency: float
+    reach: int
+    impressions: int
+    publisher_platform: str
+    platform_position: str
+    link_clicks: int
+    post_reactions: int
+    pageview_br: int
+    pageview_latam: int
+    comments: int
+    page_engagement: int
+    post_engagement: int
+    shares: int
+    video_views: int
+    last_updated_timestamp: datetime 

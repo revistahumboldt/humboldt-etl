@@ -12,9 +12,8 @@ BQ_TABLE_ID = os.getenv("BQ_TABLE_ID","")
 META_APP_ID = os.getenv("META_APP_ID","")
 META_APP_SECRET=os.getenv("META_APP_SECRET","")
 META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
-GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
+#GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 WINDOW = os.getenv("WINDOW","")
-BREAKDOWN=os.getenv("BREAKDOWN","")
 
 # ---  PRINTS DEBUG ---
 #print(f"DEBUG: Verificando variáveis de entrada para orchestrate_etl...")
@@ -58,16 +57,20 @@ try:
     # It's best to explicitly check if it's an empty string and pass None if necessary.
     #service_account_key = GCP_SERVICE_ACCOUNT_KEY_PATH if GCP_SERVICE_ACCOUNT_KEY_PATH and GCP_SERVICE_ACCOUNT_KEY_PATH.strip() else None
 
-    orchestrate_ad_insights_etl(META_AD_ACCOUNT_ID,
-        GCP_PROJECT_ID,
-        BQ_DATASET_ID,
-        BQ_TABLE_ID,
-        WINDOW,
-        BREAKDOWN,
-        META_APP_SECRET,
-        META_ACCESS_TOKEN
-        )
-
+    for table_id, breakdown in [(os.getenv("BQ_TABLE_ID1"), os.getenv("BREAKDOWN1")),
+                            (os.getenv("BQ_TABLE_ID2"), os.getenv("BREAKDOWN2"))]:
+        if table_id and breakdown:
+            orchestrate_ad_insights_etl(
+            META_AD_ACCOUNT_ID,
+            GCP_PROJECT_ID,
+            BQ_DATASET_ID,
+            table_id,
+            WINDOW,
+            breakdown,
+            META_APP_SECRET,
+            META_ACCESS_TOKEN,
+            #GCP_SERVICE_ACCOUNT_KEY_PATH
+            )
 except Exception as e:
     print(f"\nMain script: A fatal error occurred in the ETL pipeline: {e}")
     traceback.print_exc() # Print the full stack trace for more details

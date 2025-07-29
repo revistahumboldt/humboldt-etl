@@ -6,16 +6,15 @@ from datetime import datetime, date, timedelta
 from typing import Optional, Dict
 from utils.bq_auth import AuthUtils
 from datetime import datetime
+import sys
 
 class DateUtils:
-
     @staticmethod
     def default_time_range(delta: int = 0):
         since = date(2023,2,15) + timedelta(delta)
         until = date(2023,2,15) + timedelta(delta)
         return {'since':since.strftime('%Y-%m-%d'),'until': until.strftime('%Y-%m-%d')
         }
-
 
     @staticmethod
     def get_current_date() -> dict:
@@ -52,7 +51,16 @@ class DateUtils:
             if rows and rows[0].get("last_date"):
                 last_date_from_bq = rows[0].get("last_date")
                 start_day = last_date_from_bq + timedelta(1)
+                
+                print(type(last_date_from_bq))
+
+                if start_day >= datetime.now().date():
+                    print("Cannot extract data for today or future dates. Aborting operation.")
+                    sys.exit(1)
+                    
                 end_day = start_day + timedelta(delta_days) # Same date, one day extraction
+                print(f"[TEST DEBUG] Comparando start_day = {start_day} com today = {datetime.now().date()}")
+
 
                 return {
                     'since': start_day.strftime('%Y-%m-%d'),
@@ -85,6 +93,11 @@ class DateUtils:
             if rows and rows[0].get("last_date"):
                 last_date_from_bq = rows[0].get("last_date")
                 start_day = last_date_from_bq + timedelta(delta_days)
+                
+                if start_day >= datetime.now().date():
+                    print("Cannot extract data for today or future dates. Aborting operation.")
+                    sys.exit(1)
+                    
                 end_day = start_day  # Mesma data, um dia de extração
 
                 time_range = {
@@ -127,8 +140,7 @@ class DateUtils:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
             return None
         
-    
-    
+ 
     @staticmethod
     def get_delta_days(bq_last_date:date):
         current_date = datetime.now()

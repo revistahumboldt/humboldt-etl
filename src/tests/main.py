@@ -24,7 +24,7 @@ META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
 #GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 WINDOW = os.getenv("WINDOW","")
 BR_IG_PAGE_ID = "17841457253047574"
-TIME_RANGE = {'since':'2025-07-20', 'until': '2025-07-28'}
+TIME_RANGE = {'since':'2025-07-29', 'until': '2025-07-30'}
 
 def verify_env_vars():
     # verificações básicas e saídas antecipadas para debugging

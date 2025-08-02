@@ -1,15 +1,15 @@
 from facebook_business.api import FacebookAdsApi, Cursor, FacebookRequest
 from facebook_business.adobjects.iguser import IGUser
 from facebook_business.exceptions import FacebookRequestError
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 def get_instagram_data(ig_business_account_id: str, 
                                time_range: Dict[str, str]
-                              ) -> Dict[str, Any]:
+                              ) -> List[dict]:
  
     if not ig_business_account_id or not time_range:
         print("Erro: Parâmetros essenciais não foram fornecidos.")
-        return {}
+        return []
 
     params_ts = {
         'metric': 'follower_count',
@@ -26,10 +26,7 @@ def get_instagram_data(ig_business_account_id: str,
         'until': time_range['until'],
     }
 
-    final_results = {
-        "follow_count": [],
-        "website_cliks": 0
-    }
+    final_results = []
 
     try:
         ig_user = IGUser(fbid=ig_business_account_id)
@@ -46,11 +43,14 @@ def get_instagram_data(ig_business_account_id: str,
         print("Buscando variação diária de seguidores...")
         response_ts = ig_user.get_insights(params=params_ts)
         insights_ts_cursor = execute_if_needed(response_ts)
-        
+
+        if len(insights_ts_cursor) == 0:
+            final_results.append({'follow_count': [{'date': params_ts['since'], 'new_followers': 0}]})
+
         for insight in insights_ts_cursor:
             daily_values = insight.get('values', [])
             for entry in daily_values:
-                final_results["follow_count"].append({
+                final_results.append({
                     "date": entry['end_time'].split('T')[0],
                     "new_followers": entry['value']
                 })
@@ -59,19 +59,21 @@ def get_instagram_data(ig_business_account_id: str,
         print("Buscando totais do período para profile_views e website_clicks...")
         response_tv = ig_user.get_insights(params=params_tv)
         insights_tv_cursor = execute_if_needed(response_tv)
-        
-    
+
+        if len(insights_tv_cursor) == 0:
+            final_results.append({'website_clicks':0})
+            final_results.append({'profile_views':0})
 
         for insight in insights_tv_cursor:
             metric_name = insight.get('name')
             total_value = insight['total_value'].get('value')
-            #final_results.pop(metric_name)
-            final_results.update({metric_name: total_value})
+            final_results.append({metric_name: total_value})
         
         print("\nExtração de dados concluída com sucesso.")
+        print(insights_ts_cursor)
+        print(insights_tv_cursor)
         print(final_results)
-
-        #return final_results
+        return final_results
 
     except FacebookRequestError as e:
         print(f"Facebook API error: {e.api_error_message()}")
@@ -79,5 +81,5 @@ def get_instagram_data(ig_business_account_id: str,
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
-    return {}
+    return []
 

@@ -15,11 +15,9 @@ AUDIENCE="https://${GCP_REGION}-run.googleapis.com"
 SCHEDULE="0 * * * *"
 
 #: <<'EOF'
-
 # 1. Build and push Docker image
 echo "Sending image to Artifact Registry..."
 gcloud builds submit . --tag "$FULL_IMAGE"
-
 #EOF
 
 # 2. Create or update Cloud Run Jobs
@@ -41,6 +39,7 @@ if [ "$FAD_RUN_JOB_NAME" ]; then
   fi
 fi
 
+<<'EOF'
 # 3. Grant invoker permission
 echo "Checking invocation permission for: $SVC_ACCOUNT"
 EXISTS=$(gcloud projects get-iam-policy "$GCP_PROJECT_ID" \
@@ -84,4 +83,4 @@ fi
 # 5. Manually trigger Cloud Run jobs
 echo "Manually triggering Cloud Run Job: $FAD_RUN_JOB_NAME"
 gcloud run jobs execute "$FAD_RUN_JOB_NAME" --region="$GCP_REGION"
-
+EOF

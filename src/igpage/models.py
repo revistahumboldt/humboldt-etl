@@ -14,8 +14,10 @@ class InstaPageModel(BaseModel):
     date: date
     follow_count: int
     profile_views: int
-    website_clicks: str
+    website_clicks: int
     page_id: str
+    last_updated_timestamp: datetime 
+
   
 
 

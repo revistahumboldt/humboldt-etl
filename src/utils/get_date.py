@@ -140,11 +140,62 @@ class DateUtils:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
             return None
         
- 
     @staticmethod
     def get_delta_days(bq_last_date:date):
         current_date = datetime.now()
         if bq_last_date is not None:
             bq_last_date_dt = datetime.combine(bq_last_date, datetime.min.time())
             return (current_date-bq_last_date_dt).days 
+    
+    @staticmethod
+    def default_igtable_time_range(delta: int = 0):
+        today = date.today()
+        start_date = today - timedelta(days=28)
+        end_date = today - timedelta(days=27)
+        return {'since': start_date.strftime('%Y-%m-%d'),'until': end_date.strftime('%Y-%m-%d')
+        }
+
+    @staticmethod
+    def get_igpage_last_day(
+            project_id: str,
+            dataset_id: str,
+            table_id: str,
+            delta_days: int = 1,
+            page_id: Optional[str] = None,
+            service_account_key_path: Optional[str] = None
+    )-> dict:
+        client = AuthUtils.bq_authenticate(project_id, service_account_key_path)
+        try:
+            query_string = f"""
+            SELECT MAX(date) as last_date
+            FROM `{project_id}.{dataset_id}.{table_id}`
+            WHERE page_id = '{str(page_id)}'
+            """
+            query_job = client.query(query_string).result()
+            rows = list(query_job)
+            if rows and rows[0].get("last_date"):
+                last_date_from_bq = rows[0].get("last_date")
+                print("ultima data no bq", last_date_from_bq)
+                start_day = last_date_from_bq + timedelta(delta_days)
+                
+                print(type(last_date_from_bq))
+
+                if start_day >= datetime.now().date():
+                    print("Cannot extract data for today or future dates. Aborting operation.")
+                    sys.exit(1)
+                    
+                end_day = start_day + timedelta(delta_days) # add one more day for until param
+                #print(f"[TEST DEBUG] Comparando start_day = {start_day} com today = {datetime.now().date()}")
+
+
+                return {
+                    'since': start_day.strftime('%Y-%m-%d'),
+                    'until': end_day.strftime('%Y-%m-%d')
+                }
+            else:
+                print(f"Table '{table_id}' is empty or 'date_start' has no values. Returning default date.")
+            return DateUtils.default_igtable_time_range(delta_days)
+        except NotFound as e:
+            print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
+            return DateUtils.default_igtable_time_range(delta_days)
         

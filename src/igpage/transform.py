@@ -1,93 +1,37 @@
-from fad.models import AdInsightModel, Action, PlatformAdInsightModel
+from igpage.models import InstaPageModel
 from datetime import date, datetime
 
-from utils.str_to_arr import str_to_arr 
-
-def get_action_value(actions_list: list, action_type_name: str, default_value: float = 0.0) -> float:
-    for action in actions_list:
-        if action.get('action_type') == action_type_name:
-            try:
-                return float(action.get('value', default_value))
-            except (ValueError, TypeError): 
-                return default_value
-    return default_value
-
-def transform_insights(raw_insights: list[dict], breakdown: str) -> list[AdInsightModel]:
+def transform_igpage_data(ig_page_raw_insights: list[dict], pageId:str) -> list[InstaPageModel]:
     transformed_insights = []
-    breakdown_to_arr = str_to_arr(breakdown)
 
-    if "age" in breakdown_to_arr:
-        for raw_insight in raw_insights:
-                actions_data = raw_insight.get('actions', []) # all the actions in a single dictionary
+    for i in range(0, len(ig_page_raw_insights), 3):
         
-            # instance of AdInsightModel
-                transformed_insight = AdInsightModel(
-                id=raw_insight['ad_id'],
-                ad_id=raw_insight['ad_id'],
-                date_start=datetime.strptime(raw_insight['date_start'], '%Y-%m-%d').date(),
-                date_stop=datetime.strptime(raw_insight['date_stop'], '%Y-%m-%d').date(),
-                ad_name=raw_insight['ad_name'],
-                adset_name=raw_insight['adset_name'],
-                campaign_name=raw_insight['campaign_name'],
-                objective=raw_insight.get('objective', 'N/A'), 
-                optimization_goal=raw_insight.get('optimization_goal', 'N/A'),
-                spend=float(raw_insight.get('spend', 0.0)),
-                frequency=float(raw_insight.get('frequency', 0.0)),
-                reach=int(raw_insight.get('reach', 0)),
-                impressions=int(raw_insight.get('impressions', 0)),
-                age=raw_insight.get('age', "N/A"),
-                gender=raw_insight.get('gender', "N/A"),
-                #those attributes are transformed with the function get_action_value
-                link_clicks = int(get_action_value(actions_data, 'link_click')),
-                post_reactions=int(get_action_value(actions_data, 'post_reaction')),
-                pageview_br=int(get_action_value(actions_data, 'offsite_conversion.custom.1352741932244210')),
-                pageview_latam=int(get_action_value(actions_data, 'offsite_conversion.custom.165961032929296')),
-                comments=int(get_action_value(actions_data, 'comment')),
-                post_engagement = int(get_action_value(actions_data, 'post_engagement')),
-                page_engagement=int(get_action_value(actions_data, 'page_engagement')),
-                shares=int(get_action_value(actions_data, 'post')),
-                video_views=int(get_action_value(actions_data, 'video_view')),
-                last_updated_timestamp=datetime.now()
-            )
-                transformed_insights.append(transformed_insight)
-        return transformed_insights
+        # Capturing the dictionaries for the current day
+        insight_date_followers = ig_page_raw_insights[i]
+        insight_profile_views = ig_page_raw_insights[i+1]
+        insight_website_clicks = ig_page_raw_insights[i+2]
     
-    if "publisher_platform" in breakdown_to_arr:
-        for raw_insight in raw_insights:
-                actions_data = raw_insight.get('actions', []) # all the actions in a single dictionary
-        
-            # instance of PlatformAdInsightModel
-                transformed_insight = PlatformAdInsightModel(
-                id=raw_insight['ad_id'],
-                ad_id=raw_insight['ad_id'],
-                date_start=datetime.strptime(raw_insight['date_start'], '%Y-%m-%d').date(),
-                date_stop=datetime.strptime(raw_insight['date_stop'], '%Y-%m-%d').date(),
-                ad_name=raw_insight['ad_name'],
-                adset_name=raw_insight['adset_name'],
-                campaign_name=raw_insight['campaign_name'],
-                objective=raw_insight.get('objective', 'N/A'), 
-                optimization_goal=raw_insight.get('optimization_goal', 'N/A'),
-                spend=float(raw_insight.get('spend', 0.0)),
-                frequency=float(raw_insight.get('frequency', 0.0)),
-                reach=int(raw_insight.get('reach', 0)),
-                impressions=int(raw_insight.get('impressions', 0)),
-                publisher_platform=raw_insight.get('publisher_platform', "N/A"),
-                platform_position=raw_insight.get('platform_position', "N/A"),
-                #those attributes are transformed with the function get_action_value
-                link_clicks = int(get_action_value(actions_data, 'link_click')),
-                post_reactions=int(get_action_value(actions_data, 'post_reaction')),
-                pageview_br=int(get_action_value(actions_data, 'offsite_conversion.custom.1352741932244210')),
-                pageview_latam=int(get_action_value(actions_data, 'offsite_conversion.custom.165961032929296')),
-                comments=int(get_action_value(actions_data, 'comment')),
-                post_engagement = int(get_action_value(actions_data, 'post_engagement')),
-                page_engagement=int(get_action_value(actions_data, 'page_engagement')),
-                shares=int(get_action_value(actions_data, 'post')),
-                video_views=int(get_action_value(actions_data, 'video_view')),
-                last_updated_timestamp=datetime.now()
-            )
-                transformed_insights.append(transformed_insight)
-        return transformed_insights
+        # Extracting the date and metrics
+        insight_date = insight_date_followers.get('date', "")
+        new_followers = insight_date_followers.get('new_followers', 0)
+        profile_views = insight_profile_views.get('profile_views', 0)
+        website_clicks = insight_website_clicks.get('website_clicks', 0)
 
+        # instance of AdInsightModel
+        transformed_insight = InstaPageModel(
+            id=str(insight_date).strip()+str(new_followers*2).strip()+str(profile_views*5).strip()+str(website_clicks*5).strip()+str(datetime.now()),
+            date=datetime.strptime(insight_date, '%Y-%m-%d').date(),
+            follow_count=new_followers,
+            profile_views=profile_views,
+            website_clicks=website_clicks,
+            page_id=pageId,
+            last_updated_timestamp=datetime.now()
+        )
+    
+    transformed_insights.append(transformed_insight)
     return transformed_insights
+    
+   
+
 
 

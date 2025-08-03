@@ -3,28 +3,21 @@ from utils.bq_auth import AuthUtils
 from google.oauth2 import service_account
 from google.api_core.exceptions import NotFound
 from typing import List, Dict, Any, Optional
-from fad.models import AdInsightModel
-from fad.schema import age_gender_ad_insights_schema, platform_ad_insights_schema
+from igpage.models import InstaPageModel
+from igpage.schema import instagram_page_schema
 from datetime import date, datetime
-import json
-from utils.str_to_arr import str_to_arr
 
 def load_data_to_bigquery(
-    data: List[AdInsightModel],
+    data: List[InstaPageModel],
     project_id: str,
     dataset_id: str,
     table_id: str,
-    breakdown: str,
     service_account_key_path: Optional[str]=None
 ) -> Optional[bigquery.LoadJob]:
 
-    breakdown_to_arr = str_to_arr(breakdown)
-
     def get_table_schema(table_id: str) -> List[bigquery.SchemaField]:
-        if table_id == "hu_fad_age_gender":
-            return age_gender_ad_insights_schema
-        if table_id == "hu_fad_platform":
-            return platform_ad_insights_schema
+        if table_id == "hu_igpage":
+            return instagram_page_schema
         raise ValueError(f"Schema not found for table_id: {table_id}")
 
     # 1. Authentication
@@ -32,6 +25,7 @@ def load_data_to_bigquery(
 
     # 2. Check/verify dataset
     dataset_ref = client.dataset(dataset_id)
+
     try:
         client.get_dataset(dataset_ref)
         print(f"Dataset '{dataset_id}' exists.")
@@ -51,10 +45,10 @@ def load_data_to_bigquery(
     table = bigquery.Table(table_ref, schema=get_table_schema(table_id))
     table.time_partitioning = bigquery.TimePartitioning(
         type_=bigquery.TimePartitioningType.DAY,
-        field="date_start",
+        field="date",
         expiration_ms=None
     )
-    table.clustering_fields = ["ad_id", "campaign_name"]        
+    table.clustering_fields = ["page_id"]        
     try:
         client.get_table(table_ref)
         print(f"Table '{table_id}' already exists in dataset '{dataset_id}'.")
@@ -67,12 +61,7 @@ def load_data_to_bigquery(
             print(f"Error creating table '{table_id}': {e}")
             raise
 
-    #3. Check breakdown 
-    if not breakdown_to_arr or len(breakdown_to_arr) < 1:
-        print("Breakdown array must have at least one field.")
-        return
-
-    # 4. Preparing data for loading
+    # 3. Preparing data for loading
     json_data = [item.model_dump(mode='json') for item in data]
 
     if not json_data:
@@ -99,9 +88,7 @@ def load_data_to_bigquery(
 
         # 1. the columns that come from the source table (S)
         update_cols_from_source = [
-            "spend", "frequency", "reach", "impressions", "link_clicks",
-            "post_reactions", "pageview_br", "pageview_latam", "comments",
-            "page_engagement", "post_engagement", "shares", "video_views",
+            "follow_count", "profile_views", "website_clicks",
         ]
         
         # 2. Create the list of UPDATE statements from these columns
@@ -122,21 +109,14 @@ def load_data_to_bigquery(
         #print(f"Generated insert_cols: '{insert_cols}'")
         #print(f"Generated insert_values: '{insert_values}'")
 
-        
-
         # 5. Simplify the MERGE query to use the generated string
         merge_query = f"""
         MERGE INTO `{project_id}.{dataset_id}.{table_id}` T
         USING `{project_id}.{dataset_id}.{temp_table_id}` S
         ON
-        T.ad_id = S.ad_id AND
-        T.date_start = S.date_start AND
-        T.ad_name = S.ad_name AND
-        T.adset_name = S.adset_name AND
-        T.campaign_name = S.campaign_name AND
-        T.optimization_goal = S.optimization_goal AND
-        T.{breakdown_to_arr[0]} = S.{breakdown_to_arr[0]} AND
-        T.{breakdown_to_arr[1]} = S.{breakdown_to_arr[1]}
+        T.id = S.id AND
+        T.date = S.date AND
+        T.page_id = S.page_id
         WHEN MATCHED THEN
             UPDATE SET {update_statements}
         WHEN NOT MATCHED BY TARGET THEN

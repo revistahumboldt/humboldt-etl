@@ -2,13 +2,16 @@ from facebook_business.api import FacebookAdsApi, Cursor, FacebookRequest
 from facebook_business.adobjects.iguser import IGUser
 from facebook_business.exceptions import FacebookRequestError
 from typing import Dict, Any, List
+from utils.get_date import DateUtils
+from typing import List, Dict, Any, Optional
 
-def get_instagram_data(ig_business_account_id: str, 
+
+def get_igpage_raw_data(ig_business_account_id: str, 
                                time_range: Dict[str, str]
                               ) -> List[dict]:
  
     if not ig_business_account_id or not time_range:
-        print("Erro: Parâmetros essenciais não foram fornecidos.")
+        print("Error: Essential parameters not supplied.")
         return []
 
     params_ts = {
@@ -31,16 +34,16 @@ def get_instagram_data(ig_business_account_id: str,
     try:
         ig_user = IGUser(fbid=ig_business_account_id)
         
-        # --- Função auxiliar para lidar com a inconsistência do SDK ---
+        # --- Auxiliary function to deal with SDK inconsistency ---
         def execute_if_needed(request_or_cursor):
             if isinstance(request_or_cursor, FacebookRequest):
-                # Se for um Request, execute para obter o Cursor
+                # If it's a Request, run it to get the Cursor
                 return request_or_cursor.execute()
-            # Se já for um Cursor, retorne-o diretamente
+            # If it is already a Cursor, return it directly
             return request_or_cursor
 
-        # --- 1. Busca de dados de SÉRIE TEMPORAL ---
-        print("Buscando variação diária de seguidores...")
+        # --- 1. TIME SERIES data search ---
+        print("Searching for daily variation in followers...")
         response_ts = ig_user.get_insights(params=params_ts)
         insights_ts_cursor = execute_if_needed(response_ts)
 
@@ -55,8 +58,8 @@ def get_instagram_data(ig_business_account_id: str,
                     "new_followers": entry['value']
                 })
 
-        # --- 2. Busca de dados de VALOR TOTAL ---
-        print("Buscando totais do período para profile_views e website_clicks...")
+        # --- 2. TOTAL VALUE data search ---
+        print("Getting data for profile_views and website_clicks...")
         response_tv = ig_user.get_insights(params=params_tv)
         insights_tv_cursor = execute_if_needed(response_tv)
 
@@ -69,7 +72,7 @@ def get_instagram_data(ig_business_account_id: str,
             total_value = insight['total_value'].get('value')
             final_results.append({metric_name: total_value})
         
-        print("\nExtração de dados concluída com sucesso.")
+        print("\nData extraction successfully completed.")
         print(insights_ts_cursor)
         print(insights_tv_cursor)
         print(final_results)
@@ -83,3 +86,38 @@ def get_instagram_data(ig_business_account_id: str,
 
     return []
 
+
+
+def get_ig_page_next_day_data(ig_account_id: str, 
+                        gcp_project_id:str, 
+                        ig_dataset_id:str, 
+                        ig_table_id:str,
+                        increment: int = 1,
+                        service_account_key_path: Optional[str]=None
+                     ) -> list:
+    extract_has_data = False
+    increment = 1
+    
+    while not extract_has_data:
+        time_range = DateUtils.get_igpage_last_day(gcp_project_id, ig_dataset_id, ig_table_id,increment,ig_account_id,service_account_key_path)
+        print(f"Trying to get data for time_range: {time_range}") 
+        print("\n", increment)
+        print("\n", time_range)
+
+        raw_data = get_igpage_raw_data(ig_account_id, time_range)
+        
+        if len(raw_data) == 0:
+            increment = increment + 1
+            print(len(raw_data))
+            print(f"No data found for increment {increment}. Trying next increment.")
+        if len(raw_data) > 0:
+            extract_has_data = True
+            print(f"Data found for increment {increment}. Extracted {len(raw_data)} records.")
+            increment = 1  # Reset increment for next extraction
+            return list(raw_data)
+        if increment > 50:
+            print("\nNo data found multiple tries. Exiting extraction.")
+            return []
+    # Ensure a list is always returned, even if the loop does not execute
+    return []
+        

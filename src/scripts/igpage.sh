@@ -58,6 +58,7 @@ else
   echo "The roles/run.invoker permission is already assigned to $SVC_ACCOUNT"
 fi
 
+<<'EOF'
 # 4. Create or update Cloud Scheduler Jobs
 echo "Checking the existence of the Cloud Scheduler Job: $RUN_JOB_NAME"
 if gcloud scheduler jobs describe "$RUN_JOB_NAME" --location="$GCP_REGION" &> /dev/null; then
@@ -79,8 +80,9 @@ else
     --oidc-service-account-email="$SVC_ACCOUNT" \
     --oidc-token-audience="$AUDIENCE"
 fi
+EOF
 
 # 5. Manually trigger Cloud Run jobs
 echo "Manually triggering Cloud Run Job: $RUN_JOB_NAME"
 gcloud run jobs execute "$RUN_JOB_NAME" --region="$GCP_REGION"
-EOF
+

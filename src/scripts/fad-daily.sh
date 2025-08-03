@@ -12,13 +12,13 @@ SCHEDULER_JOB_NAME1="fad-daily"
 SVC_ACCOUNT="humboldt@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 FAD_SCHEDULER_URI="https://${GCP_REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${GCP_PROJECT_ID}/jobs/${FAD_RUN_JOB_NAME}:run"
 AUDIENCE="https://${GCP_REGION}-run.googleapis.com"
-SCHEDULE="0 * * * *"
+SCHEDULE="0 12 * * *"
 
-#: <<'EOF'
+<<'EOF'
 # 1. Build and push Docker image
 echo "Sending image to Artifact Registry..."
 gcloud builds submit . --tag "$FULL_IMAGE"
-#EOF
+EOF
 
 # 2. Create or update Cloud Run Jobs
 if [ "$FAD_RUN_JOB_NAME" ]; then
@@ -28,14 +28,14 @@ if [ "$FAD_RUN_JOB_NAME" ]; then
     gcloud run jobs update "$FAD_RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-daily.yaml
+      --env-vars-file=env-vars-fad-daily.yaml
 
   else
     echo "Job does not exist. Creating Cloud Run Job: $FAD_RUN_JOB_NAME"
     gcloud run jobs create "$FAD_RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-daily.yaml
+      --env-vars-file=env-vars-fad-daily.yaml
   fi
 fi
 
@@ -79,8 +79,9 @@ else
     --oidc-service-account-email="$SVC_ACCOUNT" \
     --oidc-token-audience="$AUDIENCE"
 fi
+EOF
 
 # 5. Manually trigger Cloud Run jobs
 echo "Manually triggering Cloud Run Job: $FAD_RUN_JOB_NAME"
 gcloud run jobs execute "$FAD_RUN_JOB_NAME" --region="$GCP_REGION"
-EOF
+

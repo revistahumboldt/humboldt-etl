@@ -64,8 +64,8 @@ try:
     # Exemplo de uso
     ig_posts = get_raw_igposts(
         '17841457253047574',
-        since_date='2025-05-31', 
-        until_date='2025-07-31'
+        since_date='2023-08-21', 
+        until_date='2023-08-22'
     )
 
   

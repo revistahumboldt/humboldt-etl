@@ -3,12 +3,12 @@ from utils.bq_auth import AuthUtils
 from google.oauth2 import service_account
 from google.api_core.exceptions import NotFound
 from typing import List, Dict, Any, Optional
-from igpage.models import InstaPageModel
-from igpage.schema import instagram_page_schema
+from igposts.models import InstaPostModel
+from igposts.schema import instagram_posts_schema
 from datetime import date, datetime
 
 def load_data_to_bigquery(
-    data: List[InstaPageModel],
+    data: List[InstaPostModel],
     project_id: str,
     dataset_id: str,
     table_id: str,
@@ -16,8 +16,8 @@ def load_data_to_bigquery(
 ) -> Optional[bigquery.LoadJob]:
 
     def get_table_schema(table_id: str) -> List[bigquery.SchemaField]:
-        if table_id == "hu_igpage":
-            return instagram_page_schema
+        if table_id == "hu_igposts":
+            return instagram_posts_schema
         raise ValueError(f"Schema not found for table_id: {table_id}")
 
     # 1. Authentication
@@ -48,7 +48,7 @@ def load_data_to_bigquery(
         field="date",
         expiration_ms=None
     )
-    table.clustering_fields = ["page_id"]        
+    table.clustering_fields = ["username"]        
     try:
         client.get_table(table_ref)
         print(f"Table '{table_id}' already exists in dataset '{dataset_id}'.")
@@ -88,7 +88,7 @@ def load_data_to_bigquery(
 
         # 1. the columns that come from the source table (S)
         update_cols_from_source = [
-            "follow_count", "profile_views", "website_clicks",
+            "likes", "comments", "saves", "shares", "views"
         ]
         
         # 2. Create the list of UPDATE statements from these columns
@@ -116,7 +116,10 @@ def load_data_to_bigquery(
         ON
         T.id = S.id AND
         T.date = S.date AND
-        T.page_id = S.page_id
+        T.username = S.username AND
+        T.media_product_type = S.media_product_type AND
+        T.media_type = S.media_type AND
+        T.link = S.link
         WHEN MATCHED THEN
             UPDATE SET {update_statements}
         WHEN NOT MATCHED BY TARGET THEN

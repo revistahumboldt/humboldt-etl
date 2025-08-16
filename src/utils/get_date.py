@@ -10,9 +10,9 @@ import sys
 
 class DateUtils:
     @staticmethod
-    def default_time_range(delta: int = 0):
+    def default_time_range(delta: int = 1):
         since = date(2023,2,15) + timedelta(delta)
-        until = date(2023,2,15) + timedelta(delta)
+        until = date(2023,2,15) + timedelta(delta+1)
         return {'since':since.strftime('%Y-%m-%d'),'until': until.strftime('%Y-%m-%d')
         }
 
@@ -148,7 +148,7 @@ class DateUtils:
             return (current_date-bq_last_date_dt).days 
     
     @staticmethod
-    def default_igtable_time_range(delta: int = 0):
+    def default_ig_time_range(delta: int = 0):
         today = date.today()
         start_date = today - timedelta(days=28)
         end_date = today - timedelta(days=27)
@@ -156,7 +156,7 @@ class DateUtils:
         }
 
     @staticmethod
-    def get_igpage_last_day(
+    def get_ig_last_day(
             project_id: str,
             dataset_id: str,
             table_id: str,
@@ -175,11 +175,8 @@ class DateUtils:
             rows = list(query_job)
             if rows and rows[0].get("last_date"):
                 last_date_from_bq = rows[0].get("last_date")
-                print("ultima data no bq", last_date_from_bq)
                 start_day = last_date_from_bq + timedelta(delta_days)
                 
-                print(type(last_date_from_bq))
-
                 if start_day >= datetime.now().date():
                     print("Cannot extract data for today or future dates. Aborting operation.")
                     sys.exit(1)
@@ -187,15 +184,20 @@ class DateUtils:
                 end_day = start_day + timedelta(delta_days) # add one more day for until param
                 #print(f"[TEST DEBUG] Comparando start_day = {start_day} com today = {datetime.now().date()}")
 
-
                 return {
                     'since': start_day.strftime('%Y-%m-%d'),
                     'until': end_day.strftime('%Y-%m-%d')
                 }
             else:
                 print(f"Table '{table_id}' is empty or 'date_start' has no values. Returning default date.")
-            return DateUtils.default_igtable_time_range(delta_days)
+                if table_id == "hu_igposts":
+                    return DateUtils.default_time_range(delta_days)
+                if table_id == "hu_igpage":
+                    return DateUtils.default_ig_time_range(delta_days)
         except NotFound as e:
             print(f"Dataset or table not found: {project_id}.{dataset_id}.{table_id}")
-            return DateUtils.default_igtable_time_range(delta_days)
+            if table_id == "hu_igposts":
+                    return DateUtils.default_time_range(delta_days)
+            if table_id == "hu_igpage":
+                    return DateUtils.default_ig_time_range(delta_days)
         

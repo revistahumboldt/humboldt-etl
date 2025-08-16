@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from fad.run import run_fad_etl
 from igpage.run import run_igpage_etl
+from igposts.run import run_igposts_etl
 load_dotenv()
 from fad.init_fb_api import _initialize_facebook_api
 
@@ -25,6 +26,9 @@ try:
     if ETL_TO_RUN == "igpage":
         print(f"\nMain script: Runinng igpage etl")
         run_igpage_etl()
+    if ETL_TO_RUN == "igposts":
+        print(f"\nMain script: Runinng igposts etl")
+        run_igposts_etl()
     if ETL_TO_RUN == None or ETL_TO_RUN == "":
         print(f"\nMain script: ETL_TO_RUN variable is not defined")
         sys.exit(1)

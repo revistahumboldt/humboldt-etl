@@ -11,18 +11,18 @@ from pydantic import BaseModel, Field
 
 class InstaPostModel(BaseModel):
     id: str
-    timestamp: date
+    date: date
     link: str
     media_product_type: str
     media_type: str
     likes: int
     comments: int
     saves: int
-    reach: int
-    impressions: int
-    video_views: int
+    shares: int
+    views: int
     caption: str
-    username: int
+    username: str
+    page_id: str
     last_updated_timestamp: datetime 
 
   

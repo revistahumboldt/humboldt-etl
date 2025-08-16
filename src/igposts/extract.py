@@ -4,6 +4,7 @@ from facebook_business.adobjects.igmedia import IGMedia
 from typing import List, Dict, Any, Optional
 import sys
 from utils.char_utils import CharUtils
+from utils.get_date import DateUtils
 
 # Tenta definir a codificação de saída para UTF-8
 try:
@@ -14,19 +15,10 @@ except (IOError, AttributeError):
 
 def get_raw_igposts(
     ig_business_account_id: str,
-    since_date: Optional[str] = None,
-    until_date: Optional[str] = None
-) -> List[dict]:
-    """
-    Searches for posts from an Instagram account, filtering by date in the API call.
-    Args:
-        ig_business_account_id: O ID da conta de negócios do Instagram.
-        since_date: Data de início do período, no formato 'YYYY-MM-DD'.
-        until_date: Data de fim do período, no formato 'YYYY-MM-DD'.
+    time_range: Dict[str, str]
 
-    Returns:
-        Uma lista de dicionários com os dados dos posts filtrados.
-    """
+) -> List[dict]:
+
     try:
         ig_user = IGUser(fbid=ig_business_account_id) 
         # Fields we want to search for each post
@@ -60,10 +52,9 @@ def get_raw_igposts(
 
     
         params = {}
-        if since_date:
-            params['since'] = since_date
-        if until_date:
-            params['until'] = until_date
+        if time_range:
+            params['since'] = time_range['since']
+            params['until'] = time_range['until']
 
         ig_posts = []
         ig_posts_insights = []
@@ -127,13 +118,43 @@ def get_raw_igposts(
 
        
         return final_posts
-                    
-
-                    
+                                   
 
     except Exception as e:
         print(f"Error: {e}")
         return []
     
-    return []
 
+
+def get_ig_posts_next_day_data(page_id: str, 
+                        gcp_project_id:str, 
+                        dataset_id:str, 
+                        table_id:str,
+                        increment: int = 1,
+                        service_account_key_path: Optional[str]=None
+                     ) -> list:
+    extract_has_data = False
+    increment = 1
+    
+    while not extract_has_data:
+        time_range = DateUtils.get_ig_last_day(gcp_project_id, dataset_id, table_id,increment,page_id,service_account_key_path)
+        print(f"Trying to get data for time_range: {time_range}") 
+        print("\n", increment)
+        print("\n", time_range)
+
+        raw_data = get_raw_igposts(page_id, time_range)
+        
+        if len(raw_data) == 0:
+            increment = increment + 1
+            print(len(raw_data))
+            print(f"No data found for increment {increment}. Trying next increment.")
+        if len(raw_data) > 0:
+            extract_has_data = True
+            print(f"Data found for increment {increment}. Extracted {len(raw_data)} records.")
+            increment = 1  # Reset increment for next extraction
+            return list(raw_data)
+        if increment > 50:
+            print("\nNo data found multiple tries. Exiting extraction.")
+            return []
+    # Ensure a list is always returned, even if the loop does not execute
+    return []

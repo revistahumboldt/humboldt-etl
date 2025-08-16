@@ -1,22 +1,19 @@
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 import sys
-
 # Adiciona o diretório-pai ao caminho de busca do Python
 # Isso permite importar 'igpage' como um módulo
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 import traceback
-from igpage.etl import run_etl
-
+from igposts.etl import run_etl
 
 #GCP
 GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
 IG_DATASET_ID = os.getenv("IG_DATASET_ID","")
-IG_PAGE_TABLE_ID = os.getenv("IG_PAGE_TABLE_ID","")
+IG_POSTS_TABLE_ID = os.getenv("IG_POSTS_TABLE_ID","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
 #META
@@ -36,8 +33,8 @@ def verify_env_vars():
     if not IG_DATASET_ID:
         print("CRITICAL ERROR: Environment variable IG_DATASET_ID not set. Exiting.")
         return
-    if not IG_PAGE_TABLE_ID:
-        print("CRITICAL ERROR: Environment variable IG_PAGE_TABLE_ID not set. Exiting.")
+    if not IG_POSTS_TABLE_ID:
+        print("CRITICAL ERROR: Environment variable IG_POSTS_TABLE_ID not set. Exiting.")
         return
     if not META_APP_ID:
         print("CRITICAL ERROR: Environment variable META_APP_ID not set. Exiting.")
@@ -47,14 +44,14 @@ def verify_env_vars():
         return
 verify_env_vars()
 
-def run_igpage_etl():
+def run_igposts_etl():
     try:
         for page_id in [BR_IG_PAGE_ID, ES_IG_PAGE_ID]:
             print(f"\nMain script: Executing ETL for page: {page_id}")
 
             run_etl(GCP_PROJECT_ID,
                     IG_DATASET_ID, 
-                    IG_PAGE_TABLE_ID, 
+                    IG_POSTS_TABLE_ID, 
                     page_id, 
                     META_APP_ID, 
                     META_APP_SECRET, 

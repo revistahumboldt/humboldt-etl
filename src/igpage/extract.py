@@ -73,9 +73,6 @@ def get_igpage_raw_data(ig_business_account_id: str,
             final_results.append({metric_name: total_value})
         
         print("\nData extraction successfully completed.")
-        print(insights_ts_cursor)
-        print(insights_tv_cursor)
-        print(final_results)
         return final_results
 
     except FacebookRequestError as e:

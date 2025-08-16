@@ -96,7 +96,7 @@ def get_ig_page_next_day_data(ig_account_id: str,
     increment = 1
     
     while not extract_has_data:
-        time_range = DateUtils.get_igpage_last_day(gcp_project_id, ig_dataset_id, ig_table_id,increment,ig_account_id,service_account_key_path)
+        time_range = DateUtils.get_ig_last_day(gcp_project_id, ig_dataset_id, ig_table_id,increment,ig_account_id,service_account_key_path)
         print(f"Trying to get data for time_range: {time_range}") 
         print("\n", increment)
         print("\n", time_range)

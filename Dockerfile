@@ -1,31 +1,30 @@
-# Dockerfile
 
-# Use uma imagem base oficial do Python 3.11 (slim-buster é bom para tamanho reduzido)
+# Use an official Python 3.11 base image (slim-buster is good for small size)
 FROM python:3.11-slim-buster
 
-# Define o diretório de trabalho dentro do contêiner
-# Todos os comandos subsequentes serão executados a partir deste diretório
+# Defines the working directory inside the container
+# All subsequent commands will be executed from this directory
 WORKDIR /app
 
-# Copia o arquivo de dependências (requirements.txt) e o instala
-# Fazemos isso primeiro para aproveitar o cache do Docker.
-# Se requirements.txt não mudar, esta camada não será reconstruída.
+# Copy the dependencies file (requirements.txt) and install it
+# We do this first to take advantage of Docker's cache.
+# If requirements.txt doesn't change, this layer won't be rebuilt.
 COPY requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 
-# Copia todo o código da sua aplicação para o diretório de trabalho /app
-# O '.' no final significa "copiar tudo do diretório atual (local) para o WORKDIR (contêiner)"
-# Isso incluirá main.py, src/, utils/, .env (se estiver na raiz local)
+# Copies all your application code to the /app working directory
+# The '.' at the end means "copy everything from the current (local) directory to the WORKDIR (container)"
+# This will include main.py, src/, utils/, .env (if it's in the local root)
 COPY . .
 
-# Define o comando que será executado quando o contêiner iniciar
-# Como main.py está na raiz do seu projeto e você copiou a pasta 'src' para /app,
-# o caminho para o seu script principal dentro do contêiner será /app/src/main.py.
+# Defines the command that will be executed when the container starts
+# Since main.py is in the root of your project and you copied the 'src' folder to /app,
+# the path to your main script inside the container will be /app/src/main.py.
 CMD ["python", "src/main.py"]
 
-# Observações:
-# - Não é necessário configurar portas (como 8080) ou Gunicorn para um Cloud Run Job,
-#   pois ele não serve tráfego HTTP, apenas executa um processo.
-# - Para variáveis de ambiente sensíveis, use o Secret Manager do Google Cloud
-#   em vez de incluí-las diretamente no Dockerfile ou no .env dentro da imagem
-#   (embora para desenvolvimento inicial, o .env possa ser copiado).
+# Observations:
+# - It is not necessary to configure ports (such as 8080) or Gunicorn for a Cloud Run Job,
+# because it doesn't serve HTTP traffic, it just runs a process.
+# - For sensitive environment variables, use the Google Cloud Secret Manager
+# instead of including them directly in the Dockerfile or .env inside the image
+# (although for initial development, the .env can be copied).

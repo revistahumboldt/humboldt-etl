@@ -37,7 +37,7 @@ def run_website_etl():
         run_etl(GCP_PROJECT_ID,
                 MAPP_DATASET_ID, 
                 MAPP_TABLE_ID, 
-                GCP_SERVICE_ACCOUNT_KEY_PATH
+                #GCP_SERVICE_ACCOUNT_KEY_PATH
                     )
     except ValueError as ve:
         print(f"\n run_igpage_etl script: A fatal error occurred: {ve}")

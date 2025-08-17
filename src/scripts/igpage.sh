@@ -22,14 +22,14 @@ if [ "$RUN_JOB_NAME" ]; then
     gcloud run jobs update "$RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-igpage.yaml
+      --env-vars-file=src/config/env-vars-igpage.yaml
 
   else
     echo "Job does not exist. Creating Cloud Run Job: $RUN_JOB_NAME"
     gcloud run jobs create "$RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-igpage.yaml
+      --env-vars-file=src/config/env-vars-igpage.yaml
   fi
 fi
 

@@ -28,14 +28,14 @@ if [ "$FAD_RUN_JOB_NAME" ]; then
     gcloud run jobs update "$FAD_RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-fad-daily.yaml
+      --env-vars-file=src/config/env-vars-fad-daily.yaml
 
   else
     echo "Job does not exist. Creating Cloud Run Job: $FAD_RUN_JOB_NAME"
     gcloud run jobs create "$FAD_RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=env-vars-fad-daily.yaml
+      --env-vars-file=src/config/env-vars-fad-daily.yaml
   fi
 fi
 

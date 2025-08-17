@@ -6,8 +6,8 @@ source .env
 set +o allexport
 
 FULL_IMAGE="southamerica-east1-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPO}/${GCP_IMAGE_NAME}:${GCP_IMAGE_TAG}"
-RUN_JOB_NAME="igposts-daily"
-SCHEDULER_JOB_NAME="igposts-daily"
+RUN_JOB_NAME="website-daily"
+SCHEDULER_JOB_NAME="website-daily"
 SVC_ACCOUNT="humboldt@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 FAD_SCHEDULER_URI="https://${GCP_REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${GCP_PROJECT_ID}/jobs/${RUN_JOB_NAME}:run"
 AUDIENCE="https://${GCP_REGION}-run.googleapis.com"
@@ -21,14 +21,14 @@ if [ "$RUN_JOB_NAME" ]; then
     gcloud run jobs update "$RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=src/config/env-vars-igposts.yaml
+      --env-vars-file=src/config/env-vars-website.yaml
 
   else
     echo "Job does not exist. Creating Cloud Run Job: $RUN_JOB_NAME"
     gcloud run jobs create "$RUN_JOB_NAME" \
       --image "$FULL_IMAGE" \
       --region "$GCP_REGION" \
-      --env-vars-file=src/config/env-vars-igposts.yaml
+      --env-vars-file=src/config/env-vars-website.yaml
   fi
 fi
 

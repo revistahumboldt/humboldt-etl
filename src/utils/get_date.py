@@ -47,6 +47,12 @@ class DateUtils:
                 FROM `{project_id}.{dataset_id}.{table_id}`
                 """
             
+            if table_id == "hu_fb_postlevel": 
+                query_string = f"""
+                SELECT MAX(created_time) as last_date
+                FROM `{project_id}.{dataset_id}.{table_id}`
+                """
+
             if table_id != "hu_web_pagelevel": 
                 query_string = f"""
                 SELECT MAX(date_start) as last_date

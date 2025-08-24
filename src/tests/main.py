@@ -7,10 +7,7 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
-from utils.get_date import DateUtils
-from fbpage.utils.get_page_token import get_page_token
-from fbpage.init_fb_api import _initialize_facebook_api
-from fbpage.extract import get_fb_posts_raw_data
+from igpage.etl import run_etl
 
 GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
 SOCIAL_DATASET_ID = os.getenv("SOCIAL_DATASET_ID","")
@@ -24,12 +21,15 @@ FB_PAGE_ID_PT = os.getenv("FB_PAGE_ID_PT","")
 
 
 try:
-    _initialize_facebook_api(META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN)
-    page_token = get_page_token(FB_PAGE_ID_PT)
-    _initialize_facebook_api(META_APP_ID, META_APP_SECRET, page_token)
-    posts = get_fb_posts_raw_data(FB_PAGE_ID_PT, GCP_PROJECT_ID, SOCIAL_DATASET_ID, FB_POSTS_TABLE_ID, GCP_SERVICE_ACCOUNT_KEY_PATH)
-    print(f"\nMain script: Extracted {len(posts)} posts.")
-    print(posts)
+    run_etl(GCP_PROJECT_ID,
+            SOCIAL_DATASET_ID, 
+            FB_POSTS_TABLE_ID, 
+            FB_PAGE_ID_PT, 
+            META_APP_ID, 
+            META_APP_SECRET,
+            META_ACCESS_TOKEN,
+            GCP_SERVICE_ACCOUNT_KEY_PATH
+    )
 except ValueError as ve:
     print(f"\nMain script: A fatal error occurred during Facebook API initialization: {ve}")
     exit(1) 

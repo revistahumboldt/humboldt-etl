@@ -17,13 +17,12 @@ INSIGHTS_METRICS = [
 ]
     
 
-def get_fb_posts_raw_data(fb_page_id: str, gcp_project_id:str, gcp_dataset_id: str, gcp_table_id:str, gcp_service_acc_path: str) -> list:
+def get_fb_posts_raw_data(fb_page_id: str, time_range: dict) -> list:
     fb_page_token = get_page_token(fb_page_id)
     if not fb_page_token:
         print("Error: Could not retrieve page token. Aborting.")
         return []
 
-    time_range = DateUtils.get_bq_based_time_range(gcp_project_id,gcp_dataset_id, gcp_table_id, 1, gcp_service_acc_path)
     print(f"Extracting Facebook posts from {time_range['since']} to {time_range['until']}")
 
     page_obj = Page(fb_page_id)
@@ -67,3 +66,37 @@ def get_fb_posts_raw_data(fb_page_id: str, gcp_project_id:str, gcp_dataset_id: s
     except Exception as e:
         print(f"Error while extracting insights from Facebook: {e}")
         return []
+    
+    
+def get_fb_posts_data(fb_page_id: str, 
+                        project_id:str, 
+                        dataset_id:str, 
+                        table_id:str,
+                        increment: int = 1,
+                        service_account_key_path: Optional[str]=None
+                     ) -> list:
+    extract_has_data = False
+    increment = 1
+    while not extract_has_data:
+        time_range = DateUtils.get_bq_based_time_range(project_id, dataset_id, table_id,increment,service_account_key_path)
+        print(f"Trying to get data for time_range: {time_range}") 
+        print("\n", increment)
+        print("\n", time_range)
+
+        raw_data = get_fb_posts_raw_data(fb_page_id,time_range)
+        
+        if len(raw_data) == 0:
+            increment = increment + 1
+            print(len(raw_data))
+            print(f"No data found for increment {increment}. Trying next increment.")
+        if len(raw_data) > 0:
+            extract_has_data = True
+            print(f"Data found for increment {increment}. Extracted {len(raw_data)} records.")
+            increment = 1  # Reset increment for next extraction
+            return list(raw_data)
+        if increment > 50:
+            print("\nNo data found multiple tries. Exiting extraction.")
+            return []
+    # Ensure a list is always returned, even if the loop does not execute
+    return []
+        

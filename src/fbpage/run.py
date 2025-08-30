@@ -13,12 +13,11 @@ META_APP_ID = os.getenv("META_APP_ID","")
 META_APP_SECRET=os.getenv("META_APP_SECRET","")
 META_ACCESS_TOKEN=os.getenv("META_ACCESS_TOKEN","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
-WINDOW = os.getenv("WINDOW","")
 
 
 def run_fad_etl():
     try:
-        print(f"\n run_fad_etl: Running ETL pipeline for window: {WINDOW}")
+        print(f"\n run_fad_etl: Running ETL pipeline for facebook posts")
     # If it is an empty string (""), Python will treat it as "False" in a boolean context
     # and it will be None for the orquerstrate_etl function if the default is None.
     # It's best to explicitly check if it's an empty string and pass None if necessary.
@@ -32,7 +31,7 @@ def run_fad_etl():
                 GCP_PROJECT_ID,
                 BQ_DATASET_ID,
                 table_id,
-                WINDOW,
+                "WINDOW",
                 breakdown,
                 META_APP_SECRET,
                 META_ACCESS_TOKEN,

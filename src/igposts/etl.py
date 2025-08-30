@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def run_etl(gcp_project_id: str,
-            bq_dataset_id: str, 
-            bq_table_id: str,
+            dataset_id: str, 
+            table_id: str,
             page_id:str,
             meta_app_id:str,
             meta_app_secret: str,
@@ -26,13 +26,13 @@ def run_etl(gcp_project_id: str,
     try:
         # 1. Extracting
         print("\n2. Data extraction for ig posts...")
-        raw_ig_posts_data = get_ig_posts_next_day_data(page_id, gcp_project_id, bq_dataset_id, bq_table_id, 1,service_account_key_path)
+        raw_ig_posts_data = get_ig_posts_next_day_data(page_id, gcp_project_id, dataset_id, table_id, 1,service_account_key_path)
      
         # 2. Transforming
         print("\n2. Data transformation for ig posts...")
         igposts_transformed_data = transform_igposts_data(raw_ig_posts_data, page_id)
         print(f"Transformation applied on {len(igposts_transformed_data)} items.")
-        print(igposts_transformed_data)
+        #print(igposts_transformed_data)
 
         if not igposts_transformed_data:
             print("No transformed data to load. Closing the pipeline.")
@@ -40,7 +40,8 @@ def run_etl(gcp_project_id: str,
         
         # 3. Loading in BigQuery
         print("\n3. Loading  ig posts data into BigQuery...")
-        load_data_to_bigquery(igposts_transformed_data,gcp_project_id, bq_dataset_id, bq_table_id, service_account_key_path)
+        print("dataset", dataset_id)
+        load_data_to_bigquery(igposts_transformed_data,gcp_project_id, dataset_id, table_id, service_account_key_path)
         
    
     except Exception as e:

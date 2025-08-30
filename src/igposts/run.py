@@ -12,7 +12,7 @@ from igposts.etl import run_etl
 
 #GCP
 GCP_PROJECT_ID=os.getenv("GCP_PROJECT_ID", "")  
-IG_DATASET_ID = os.getenv("IG_DATASET_ID","")
+SOCIAL_DATASET_ID = os.getenv("SOCIAL_DATASET_ID","")
 IG_POSTS_TABLE_ID = os.getenv("IG_POSTS_TABLE_ID","")
 GCP_SERVICE_ACCOUNT_KEY_PATH = os.getenv("GCP_SERVICE_ACCOUNT_KEY_PATH","")
 
@@ -26,12 +26,12 @@ ES_IG_PAGE_ID = os.getenv("ES_IG_PAGE_ID","")
 BR_IG_PAGE_ID = os.getenv("BR_IG_PAGE_ID","")
 
 def verify_env_vars():
-    # verificações básicas e saídas antecipadas para debugging
+    # basic checks and early outputs for debugging
     if not GCP_PROJECT_ID:
         print("CRITICAL ERROR: Environment variable GCP_PROJECT_ID not set. Exiting.")
         return 
-    if not IG_DATASET_ID:
-        print("CRITICAL ERROR: Environment variable IG_DATASET_ID not set. Exiting.")
+    if not SOCIAL_DATASET_ID:
+        print("CRITICAL ERROR: Environment variable SOCIAL_DATASET_ID not set. Exiting.")
         return
     if not IG_POSTS_TABLE_ID:
         print("CRITICAL ERROR: Environment variable IG_POSTS_TABLE_ID not set. Exiting.")
@@ -50,13 +50,13 @@ def run_igposts_etl():
             print(f"\nMain script: Executing ETL for page: {page_id}")
 
             run_etl(GCP_PROJECT_ID,
-                    IG_DATASET_ID, 
+                    SOCIAL_DATASET_ID, 
                     IG_POSTS_TABLE_ID, 
                     page_id, 
                     META_APP_ID, 
                     META_APP_SECRET, 
                     META_ACCESS_TOKEN,
-                    #GCP_SERVICE_ACCOUNT_KEY_PATH
+                    GCP_SERVICE_ACCOUNT_KEY_PATH
                     )
     except ValueError as ve:
         print(f"\n run_igpage_etl script: A fatal error occurred during Facebook API initialization: {ve}")

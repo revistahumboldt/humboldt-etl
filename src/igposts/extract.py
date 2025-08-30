@@ -6,12 +6,12 @@ import sys
 from utils.char_utils import CharUtils
 from utils.get_date import DateUtils
 
-# Tenta definir a codificação de saída para UTF-8
+# Try setting the output encoding to UTF-8
 try:
     if sys.stdout.encoding != 'utf-8':
         sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 except (IOError, AttributeError):
-    pass # Ignora se não for possível reabrir
+    pass # Ignore if cannot be reopened
 
 def get_raw_igposts(
     ig_business_account_id: str,
@@ -115,8 +115,7 @@ def get_raw_igposts(
                 combined_post = {**post_correspondente, **insight}
                 
                 final_posts.append(combined_post)
-
-       
+        
         return final_posts
                                    
 

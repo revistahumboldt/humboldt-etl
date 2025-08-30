@@ -58,6 +58,12 @@ class DateUtils:
                 SELECT MAX(date_start) as last_date
                 FROM `{project_id}.{dataset_id}.{table_id}`
                 """
+            
+            if table_id == "hu_web_pagelevel": 
+                query_string = f"""
+                SELECT MAX(registered_date) as last_date
+                FROM `{project_id}.{dataset_id}.{table_id}`
+                """
 
             query_job = client.query(query_string).result()
             rows = list(query_job)

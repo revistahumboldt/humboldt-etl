@@ -45,7 +45,7 @@ def load_data_to_bigquery(
     table = bigquery.Table(table_ref, schema=get_table_schema(table_id))
     table.time_partitioning = bigquery.TimePartitioning(
         type_=bigquery.TimePartitioningType.DAY,
-        field="date",
+        field="registered_date",
         expiration_ms=None
     )
     table.clustering_fields = ["url"]        
@@ -88,7 +88,7 @@ def load_data_to_bigquery(
 
         # 1. the columns that come from the source table (S)
         update_cols_from_source = [
-            "page_impressions", "pages_entries", "visits_bounces", "visitors", "pages_duration_avg"
+            "page_impressions", "pages_entries", "bounces", "pages_duration_avg", "count_scrolldepth", "scrolldepth_50", "scrolldepth_abs"
         ]
         
         # 2. Create the list of UPDATE statements from these columns
@@ -115,7 +115,8 @@ def load_data_to_bigquery(
         USING `{project_id}.{dataset_id}.{temp_table_id}` S
         ON
         T.id = S.id AND
-        T.date = S.date AND
+        T.registered_date = S.registered_date AND
+        T.title = S.title AND
         T.location_country = S.location_country AND
         T.url = S.url
         WHEN MATCHED THEN

@@ -1,70 +1,93 @@
 config_analysis = {
     "resultType": "DATA_ONLY",
-    "queryObject": {
-        "columns": [
-            {
-                "name": "page_category_text_15",
-                "scope": "OBJECT",
-                "context": "PAGE",
-                "lowerLimit": 1,
-                "upperLimit": 30000
-            },
-            {
-                "name": "page_url",
-                "scope": "OBJECT",
-                "context": "PAGE",
-                "lowerLimit": 1,
-                "upperLimit": 30000
-            },
-            {
-                "name": "time_days",
-                "sortDirection": "ASCENDING",
-                "sortIndex": 1,
-                "scope": "OBJECT",
-                "context": "NONE"
-            },
-            {
-                "name": "location_country",
-                "scope": "OBJECT",
-                "context": "SESSION"
-            },
-            {
-                "name": "device_deviceClass",
-                "scope": "OBJECT",
-                "context": "SESSION"
-            },
-            {
-                "name": "pages_pageImpressions",
-                "columnPeriod": "ANALYSIS",
-                "scope": "OBJECT",
-                "context": "PAGE",
-                "variant": "NORMAL"
-            },
-            {
-                "name": "pages_entries",
-                "columnPeriod": "ANALYSIS",
-                "scope": "OBJECT",
-                "context": "PAGE"
-            },
-            {
-                "name": "visits_bounces",
-                "columnPeriod": "ANALYSIS",
-                "scope": "OBJECT",
-                "context": "PAGE"
-            },
-            {
-                "name": "visitors",
-                "columnPeriod": "ANALYSIS",
-                "scope": "OBJECT",
-                "context": "SESSION"
-            },
-            {
-                "name": "pages_durationAvg",
-                "columnPeriod": "ANALYSIS",
-                "scope": "OBJECT"
-            },
-
-        ],
+        "queryObject": {
+            "columns": [
+        {
+            "name": "time_days",
+            "scope": "OBJECT",
+            "context": "NONE",
+            "lowerLimit": 1,
+            "upperLimit": 3
+        },
+        {
+            "name": "page_category_text_15",
+            "scope": "OBJECT",
+            "context": "PAGE",
+            "lowerLimit": 1,
+            "upperLimit": 2
+        },
+        {
+            "name": "page_url",
+            "scope": "OBJECT",
+            "context": "PAGE",
+            "lowerLimit": 1,
+            "upperLimit": 10
+        },
+        {
+            "name": "location_country",
+            "scope": "OBJECT",
+            "context": "SESSION"
+        },
+        {
+            "name": "device_deviceClass",
+            "scope": "OBJECT",
+            "context": "SESSION"
+        },
+        {
+            "name": "pages_pageImpressions",
+            "columnPeriod": "ANALYSIS",
+            "sortDirection": "DESCENDING",
+            "sortIndex": 1,
+            "scope": "OBJECT",
+            "context": "PAGE",
+            "variant": "NORMAL"
+        },
+        {
+            "name": "pages_entries",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT",
+            "context": "PAGE"
+        },
+        {
+            "name": "pages_exits",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT",
+            "context": "PAGE"
+        },
+        {
+            "name": "visits_bounces",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT",
+            "context": "PAGE"
+        },
+        {
+            "name": "events_clicks",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT",
+            "context": "ACTION"
+        },
+        {
+            "name": "pages_durationAvg",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT"
+        },
+        {
+            "name": "event_parameter_number_501_sum",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT",
+            "context": "ACTION"
+        },
+        {
+            "name": "custom_formula_1000019",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT"
+        },
+        {
+            "name": "custom_formula_1000022",
+            "columnPeriod": "ANALYSIS",
+            "scope": "OBJECT"
+        }
+    ],
         "predefinedContainer": {
             "filters": [
                 {

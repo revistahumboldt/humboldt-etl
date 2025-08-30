@@ -15,6 +15,8 @@ def run_etl(gcp_project_id: str,
         # 1. Extracting
         print("\n2. Data extraction for website data...")
         raw_mapp_data = get_webiste_page_data(gcp_project_id, bq_dataset_id, bq_table_id, 3,service_account_key_path)
+
+        
      
         # 2. Transforming
         print("\n2. Data transformation for website data...")

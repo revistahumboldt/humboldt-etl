@@ -7,14 +7,14 @@ def transform_website_data(web_raw_data: list[list]) -> list[WebPageInsightModel
 
     for row in web_raw_data:
         try:
-            # Validar e converter data
+            # Validate and convert date
             parsed_date = datetime.strptime(row[0], "%Y%m%d").date()
         except ValueError:
-            # Se não for uma data válida, pula a linha
+            # If it's not a valid date, skip the line
             print(f"Skipped line (invalid date): {row}")
             continue
 
-        # Gerar hash único da URL
+        # Generate unique URL hash
         url_hash = hashlib.md5(row[1].encode("utf-8")).hexdigest()
 
         transformed_insight = WebPageInsightModel(
@@ -35,8 +35,6 @@ def transform_website_data(web_raw_data: list[list]) -> list[WebPageInsightModel
             scrolldepth_abs=float(row[13]),
             last_updated_timestamp=datetime.now()
         )
-
-     
         
         transformed_insights.append(transformed_insight)
 

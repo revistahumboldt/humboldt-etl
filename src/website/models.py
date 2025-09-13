@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 # 1. Model for Website
 #    - Based on Mapp Standard Fields
 # --------------------------------------------------------------------------------
-
 class WebPageInsightModel(BaseModel):
     id: str
     registered_date: date

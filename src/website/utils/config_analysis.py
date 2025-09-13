@@ -7,21 +7,21 @@ config_analysis = {
             "scope": "OBJECT",
             "context": "NONE",
             "lowerLimit": 1,
-            "upperLimit": 3
+            "upperLimit": 10000
         },
         {
             "name": "page_category_text_15",
             "scope": "OBJECT",
             "context": "PAGE",
             "lowerLimit": 1,
-            "upperLimit": 2
+            "upperLimit": 10000
         },
         {
             "name": "page_url",
             "scope": "OBJECT",
             "context": "PAGE",
             "lowerLimit": 1,
-            "upperLimit": 10
+            "upperLimit": 10000
         },
         {
             "name": "location_country",

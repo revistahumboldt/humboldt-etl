@@ -44,11 +44,10 @@ def get_webiste_page_data(project_id: str,
         config_analysis['queryObject']['predefinedContainer']['filters'][0]['value1'] = time_range['since']
         config_analysis['queryObject']['predefinedContainer']['filters'][0]['value2'] = time_range['until']
 
-        print(config_analysis['queryObject']['predefinedContainer']['filters'][0])
+        #print(config_analysis['queryObject']['predefinedContainer']['filters'][0])
 
         mapp_config = config_analysis
      
-        
         result_url = None
         while not result_url:
             print("Waiting for the data to be ready...")

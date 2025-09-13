@@ -14,10 +14,14 @@ def run_etl(gcp_project_id: str,
     try:
         # 1. Extracting
         print("\n2. Data extraction for website data...")
-        raw_mapp_data = get_webiste_page_data(gcp_project_id, bq_dataset_id, bq_table_id, 3,service_account_key_path)
-
+        raw_mapp_data = get_webiste_page_data(gcp_project_id, bq_dataset_id, bq_table_id, 1,service_account_key_path)
+        print(f"Extraction returned {len(raw_mapp_data)} rows of data.")
         
-     
+        """
+        for row in raw_mapp_data: 
+            print(row[5])
+        """
+
         # 2. Transforming
         print("\n2. Data transformation for website data...")
         website_transformed_data = transform_website_data(raw_mapp_data)
@@ -30,6 +34,7 @@ def run_etl(gcp_project_id: str,
         # 3. Loading in BigQuery
         print("\n3. Loading  ig posts data into BigQuery...")
         load_data_to_bigquery(website_transformed_data,gcp_project_id, bq_dataset_id, bq_table_id, service_account_key_path)
+        
         
    
     except Exception as e:

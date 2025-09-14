@@ -30,10 +30,6 @@ def get_raw_igposts(
             IGMedia.Field.media_type,
             IGMedia.Field.like_count,
             IGMedia.Field.comments_count,
-            #saves
-            #reach
-            #impressions
-            #video views
             IGMedia.Field.caption,
             IGMedia.Field.username,
         ]
@@ -45,8 +41,8 @@ def get_raw_igposts(
         'likes',
         'saved',
         'shares',
-        'total_interactions'
-        #'impressions',
+        'total_interactions',
+        'impressions',
         ]
         # Dictionary for date filter parameters
 
@@ -71,8 +67,6 @@ def get_raw_igposts(
                 if 'caption' in post:
                     post['caption'] = CharUtils.remove_invalid_chars(post['caption'])
 
-                #17953504346470677
-                #17973115214140706
                 # get the insights metrics 
                 ig_media = IGMedia(post['id'])
                 insights_data_cursor = ig_media.get_insights(params={
@@ -83,7 +77,7 @@ def get_raw_igposts(
                     
                     for insight_post in insights_data_cursor:
                         
-                        # Extrai o ID e o nome do insights
+                        # Extracts the ID and name of the insights
                         insight_id = insight_post['id'][:17]
                         insight_name = insight_post['name']
                         insight_values = insight_post['values'][0]['value']

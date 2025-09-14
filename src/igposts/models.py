@@ -20,6 +20,7 @@ class InstaPostModel(BaseModel):
     saves: int
     shares: int
     views: int
+    impressions: int
     caption: str
     username: str
     page_id: str

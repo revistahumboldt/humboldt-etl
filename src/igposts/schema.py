@@ -13,6 +13,7 @@ instagram_posts_schema = [
     SchemaField("saves", "INTEGER", mode="REQUIRED", description="Salvamentos"),
     SchemaField("shares", "INTEGER", mode="REQUIRED", description="Compartilhamentos"),
     SchemaField("views", "INTEGER", mode="REQUIRED", description="Visualizações únicas do post"),
+    SchemaField("impressions", "INTEGER", mode="REQUIRED", description="Impressões do post"),
     SchemaField("caption", "STRING", mode="REQUIRED", description="Texto do post"),
     SchemaField("username", "STRING", mode="REQUIRED", description="Nome da página do Instagram"),
     SchemaField("page_id", "STRING", mode="REQUIRED", description="ID da página do Instagram"),

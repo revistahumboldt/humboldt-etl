@@ -88,7 +88,7 @@ def load_data_to_bigquery(
 
         # 1. the columns that come from the source table (S)
         update_cols_from_source = [
-            "likes", "comments", "saves", "shares", "views"
+            "likes", "comments", "saves", "shares", "views", "impressions"
         ]
         
         # 2. Create the list of UPDATE statements from these columns

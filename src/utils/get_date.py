@@ -75,7 +75,7 @@ class DateUtils:
 
                 if start_day >= datetime.now().date():
                     print("Cannot extract data for today or future dates. Aborting operation.")
-                    sys.exit(1)
+                    sys.exit(0)
                     
                 end_day = start_day + timedelta(delta_days) # Same date, one day extraction
                 print(f"[TEST DEBUG] Comparando start_day = {start_day} com today = {datetime.now().date()}")

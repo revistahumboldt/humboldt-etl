@@ -56,7 +56,7 @@ def run_igposts_etl():
                     META_APP_ID, 
                     META_APP_SECRET, 
                     META_ACCESS_TOKEN,
-                    GCP_SERVICE_ACCOUNT_KEY_PATH
+                    #GCP_SERVICE_ACCOUNT_KEY_PATH
                     )
     except ValueError as ve:
         print(f"\n run_igpage_etl script: A fatal error occurred during Facebook API initialization: {ve}")

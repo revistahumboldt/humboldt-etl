@@ -41,7 +41,6 @@ def get_raw_igposts(
         'likes',
         'saved',
         'shares',
-        'total_interactions',
         'impressions',
 
         ]
@@ -53,7 +52,6 @@ def get_raw_igposts(
         'likes',
         'saved',
         'shares',
-        'total_interactions',
 
         ]
 
@@ -85,9 +83,9 @@ def get_raw_igposts(
                 # get the insights metrics 
                 ig_media = IGMedia(post['id'])
 
-                
                 #verify if the media type
                 if post['media_type'] == 'VIDEO':
+                    print(f"Processing post ID: {post['id']} with media type: {post['media_type']}")
                     insights_data_cursor_video = ig_media.get_insights(params={
                         'metric': insights_metrics_video
                     })
@@ -112,28 +110,29 @@ def get_raw_igposts(
                                         item[insight_name] = insight_values
                 
                 
-                insights_data_cursor = ig_media.get_insights(params={
+                else:
+                    print(f"Processing post ID: {post['id']} with media type: {post['media_type']}")
+                    insights_data_cursor = ig_media.get_insights(params={
                             'metric': insights_metrics
                         })
-                
-                if isinstance(insights_data_cursor, Cursor):
-                    
-                    for insight_post in insights_data_cursor:
+                    if isinstance(insights_data_cursor, Cursor):
                         
-                        # Extracts the ID and name of the insights
-                        insight_id = insight_post['id'][:17]
-                        insight_name = insight_post['name']
-                        insight_values = insight_post['values'][0]['value']
+                        for insight_post in insights_data_cursor:
+                            
+                            # Extracts the ID and name of the insights
+                            insight_id = insight_post['id'][:17]
+                            insight_name = insight_post['name']
+                            insight_values = insight_post['values'][0]['value']
 
-                        if insight_id not in processed_ids:
-                            processed_ids.add(insight_id) 
-                            ig_posts_insights.append({
-                            'id': insight_id })
-                        
-                        if insight_id in processed_ids:
-                              for item in ig_posts_insights:
-                                if item['id'] == insight_id:
-                                    item[insight_name] = insight_values
+                            if insight_id not in processed_ids:
+                                processed_ids.add(insight_id) 
+                                ig_posts_insights.append({
+                                'id': insight_id })
+                            
+                            if insight_id in processed_ids:
+                                for item in ig_posts_insights:
+                                    if item['id'] == insight_id:
+                                        item[insight_name] = insight_values
 
 
         # mapping dictionary
@@ -155,7 +154,7 @@ def get_raw_igposts(
         
         print(f"Total final posts combined: {len(final_posts)}")
         
-        return [] #final_posts
+        return final_posts
                                    
 
     except Exception as e:

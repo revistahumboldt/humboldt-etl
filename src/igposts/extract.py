@@ -1,4 +1,4 @@
-from facebook_business.api import FacebookAdsApi, Cursor
+from facebook_business.api import FacebookAdsApi, Cursor, FacebookRequest
 from facebook_business.adobjects.iguser import IGUser
 from facebook_business.adobjects.igmedia import IGMedia
 from typing import List, Dict, Any, Optional
@@ -43,7 +43,20 @@ def get_raw_igposts(
         'shares',
         'total_interactions',
         'impressions',
+
         ]
+       
+        # List of insight metrics for videos
+        insights_metrics_video = [
+        'views',
+        'comments',
+        'likes',
+        'saved',
+        'shares',
+        'total_interactions',
+
+        ]
+
         # Dictionary for date filter parameters
 
     
@@ -58,21 +71,51 @@ def get_raw_igposts(
         final_posts = []
         
         posts_cursor = ig_user.get_media(fields=fields, params=params)
+        
         if isinstance(posts_cursor, Cursor):
             ig_posts = [post.export_all_data() for post in posts_cursor]
             
-            #for each post, we do
+            #for each post...
             for post in ig_posts:
+                
                 #remove invalid chars
                 if 'caption' in post:
                     post['caption'] = CharUtils.remove_invalid_chars(post['caption'])
 
                 # get the insights metrics 
                 ig_media = IGMedia(post['id'])
-                insights_data_cursor = ig_media.get_insights(params={
-                    'metric': insights_metrics
-                })
 
+                
+                #verify if the media type
+                if post['media_type'] == 'VIDEO':
+                    insights_data_cursor_video = ig_media.get_insights(params={
+                        'metric': insights_metrics_video
+                    })
+                
+                    if isinstance(insights_data_cursor_video, Cursor):
+                        
+                        for insight_post in insights_data_cursor_video:
+                            
+                            # Extracts the ID and name of the insights
+                            insight_id = insight_post['id'][:17]
+                            insight_name = insight_post['name']
+                            insight_values = insight_post['values'][0]['value']
+
+                            if insight_id not in processed_ids:
+                                processed_ids.add(insight_id) 
+                                ig_posts_insights.append({
+                                'id': insight_id })
+                            
+                            if insight_id in processed_ids:
+                                for item in ig_posts_insights:
+                                    if item['id'] == insight_id:
+                                        item[insight_name] = insight_values
+                
+                
+                insights_data_cursor = ig_media.get_insights(params={
+                            'metric': insights_metrics
+                        })
+                
                 if isinstance(insights_data_cursor, Cursor):
                     
                     for insight_post in insights_data_cursor:
@@ -91,8 +134,8 @@ def get_raw_igposts(
                               for item in ig_posts_insights:
                                 if item['id'] == insight_id:
                                     item[insight_name] = insight_values
-                               
-        
+
+
         # mapping dictionary
         posts_por_id = {post['id']: post for post in ig_posts}
 
@@ -110,15 +153,15 @@ def get_raw_igposts(
                 
                 final_posts.append(combined_post)
         
-        return final_posts
+        print(f"Total final posts combined: {len(final_posts)}")
+        
+        return [] #final_posts
                                    
 
     except Exception as e:
         print(f"Error: {e}")
         return []
     
-
-
 def get_ig_posts_next_day_data(page_id: str, 
                         gcp_project_id:str, 
                         dataset_id:str, 

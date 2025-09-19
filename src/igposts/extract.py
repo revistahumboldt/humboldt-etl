@@ -42,7 +42,9 @@ def get_raw_igposts(
         'saved',
         'shares',
         'impressions',
-
+        "reach",
+        "profile_activity",
+        "total_interactions"
         ]
        
         # List of insight metrics for videos
@@ -52,12 +54,13 @@ def get_raw_igposts(
         'likes',
         'saved',
         'shares',
-
+        "reach",
+        "ig_reels_avg_watch_time",
+        "ig_reels_video_view_total_time",
+        "total_interactions"
         ]
 
         # Dictionary for date filter parameters
-
-    
         params = {}
         if time_range:
             params['since'] = time_range['since']

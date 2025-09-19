@@ -21,6 +21,11 @@ class InstaPostModel(BaseModel):
     shares: int
     views: int
     impressions: int
+    reach: int
+    profile_activity: int
+    total_interactions: int
+    ig_reels_avg_watch_time: int
+    ig_reels_video_view_total_time: int
     caption: str
     username: str
     page_id: str

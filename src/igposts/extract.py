@@ -87,7 +87,7 @@ def get_raw_igposts(
                 ig_media = IGMedia(post['id'])
 
                 #verify if the media type
-                if post['media_type'] == 'VIDEO':
+                if post['media_type'] == 'VIDEO' and post['media_product_type'] == 'REELS':
                     print(f"Processing post ID: {post['id']} with media type: {post['media_type']}")
                     insights_data_cursor_video = ig_media.get_insights(params={
                         'metric': insights_metrics_video

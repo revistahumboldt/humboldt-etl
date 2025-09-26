@@ -41,7 +41,7 @@ def get_raw_igposts(
         'likes',
         'saved',
         'shares',
-        'impressions',
+        #'impressions',
         "reach",
         "profile_activity",
         "total_interactions"

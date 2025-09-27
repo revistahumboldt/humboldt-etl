@@ -22,7 +22,7 @@ def load_data_to_bigquery(
 
     # 1. Authentication
     client = AuthUtils.bq_authenticate(project_id, service_account_key_path)
-
+    
     # 2. Check/verify dataset
     dataset_ref = client.dataset(dataset_id)
 

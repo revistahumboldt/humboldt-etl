@@ -25,6 +25,7 @@ def load_data_to_bigquery(
 
     # 2. Check/verify dataset
     dataset_ref = client.dataset(dataset_id)
+    print("Sou o dataset_ref", dataset_ref)
 
     try:
         client.get_dataset(dataset_ref)

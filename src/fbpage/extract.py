@@ -19,9 +19,10 @@ INSIGHTS_METRICS = [
 
 def get_fb_posts_raw_data(fb_page_id: str, time_range: dict) -> list:
     fb_page_token = get_page_token(fb_page_id)
+    print("Here", fb_page_token)
     if not fb_page_token:
         print("Error: Could not retrieve page token. Aborting.")
-        return []
+        SystemExit(1)
 
     print(f"Extracting Facebook posts from {time_range['since']} to {time_range['until']}")
 

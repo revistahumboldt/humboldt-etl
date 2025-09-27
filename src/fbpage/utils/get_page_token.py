@@ -4,13 +4,13 @@ import os
 from dotenv import load_dotenv
 from typing import cast, Dict, Any
 
-
 load_dotenv()
 
 def get_page_token(page_id: str) -> str:
     page_access_token = ""
     try:
         page_obj = Page(page_id)
+        print(page_id)
         
         # Cast para type dict
         page_info = cast(Dict[str, Any], page_obj.api_get(fields=['access_token']))
@@ -27,6 +27,6 @@ def get_page_token(page_id: str) -> str:
     
     except Exception as e:
         print("Error retrieving page access token.")
-        print(f"Detalhes: {e}")
+        print(f"Details: {e}")
         return page_access_token
     

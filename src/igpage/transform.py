@@ -6,8 +6,8 @@ def transform_igpage_data(ig_page_raw_insights: list[dict], pageId:str) -> list[
 
         # Capturing the dictionaries for the current day
         insight_date_followers = ig_page_raw_insights[0]
-        insight_profile_views = ig_page_raw_insights[2]['website_clicks']
-        insight_website_clicks = ig_page_raw_insights[1]['profile_views']
+        insight_profile_views = ig_page_raw_insights[1]['profile_views']
+        insight_website_clicks = ig_page_raw_insights[2]['website_clicks']
     
         # Extracting the date and metrics
         insight_date = insight_date_followers['date']

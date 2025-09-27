@@ -40,11 +40,11 @@ def run_etl(project_id: str,
         if not ig_raw_page_data:
             print("No transformed data to load. Closing the pipeline.")
             return
-    
+        """
         # 3. Loading in BigQuery
         print("\n3. Loading data into BigQuery.")
         load_data_to_bigquery(igpage_transformed_data,project_id, dataset_id, table_id, service_account_key_path)
-        
+        """
         
         
     except Exception as e:

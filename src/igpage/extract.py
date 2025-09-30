@@ -16,6 +16,7 @@ def get_igpage_raw_data(ig_business_account_id: str,
 
     params_ts = {
         'metric': 'follower_count',
+        #'metric': 'follows_and_unfollows',
         'period': 'day',
         'since': time_range['since'],
         'until': time_range['until'],
